@@ -1116,14 +1116,16 @@ function renderSuggestions() {
     const name = (u.name || '').toLowerCase();
     const uname = (u.username || '').toLowerCase();
     const email = (u.email || '').toLowerCase();
+    // keep matching by email but do NOT display it in suggestions
     return name.includes(q) || uname.includes(q) || email.includes(q);
   }).slice(0, 8);
 
   if (!matches.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
 
   box.innerHTML = matches.map(u => {
-    const label = u.username ? ('@' + u.username) : (u.name || u.email || 'User');
-    const sub = u.email ? (' · ' + u.email) : '';
+    // Display name and username only — do not expose email in UI
+    const label = u.name || 'Пользователь';
+    const sub = u.username ? (' · @' + u.username) : '';
     const initials = (u.name || '').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() || (u.username||'').slice(0,2).toUpperCase();
     return `<div class="sugg-item" data-uid="${u.id}" style="display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:6px;cursor:pointer">
       <div style="width:36px;height:36px;border-radius:50%;background:${u.color||CLR[0]};display:flex;align-items:center;justify-content:center;font-weight:700;color:#111">${initials}</div>
