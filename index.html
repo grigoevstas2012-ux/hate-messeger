@@ -254,7 +254,8 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
   #rpanel{display:none}
   #app.msgview #sidebar{display:none}
   #app.msgview #main{display:flex}
-  #app.msgview #rpanel{display:flex}
+  /* show rpanel only when message view AND explicit info-open flag are set */
+  #app.msgview.info-open #rpanel{display:flex}
   #msgs{padding:12px 5%}#topbar{height:56px;padding:0 12px}
   .mwrap{max-width:85%}#inpwrap{padding:7px 12px 10px}.inpb{width:32px;height:32px}
   .sndbtn{width:34px;height:34px}.cname{max-width:140px}.cprev{max-width:160px}
@@ -1694,6 +1695,8 @@ function clsFwd() {
 function tglInfo() {
   infoOpen = !infoOpen;
   document.getElementById('rpanel').classList.toggle('off', !infoOpen);
+  // mark app so CSS can show rpanel only when explicitly opened
+  document.getElementById('app').classList.toggle('info-open', infoOpen);
   updInfo();
 }
 
