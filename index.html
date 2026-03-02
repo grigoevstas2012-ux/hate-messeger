@@ -1279,34 +1279,42 @@ function updTB() {
 
 // ── MSGS ──
 function renderMsgs() {
-  if (!activeChat) return;
-  
-  const msgs = (chats[activeChat] || {}).messages || [];
-  const el = document.getElementById('msgs');
-  el.innerHTML = '';
-  
-  let lastDate = '';
-  
-  msgs.forEach(msg => {
-    const msgDate = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleDateString('ru', { day: 'numeric', month: 'long' }) : '';
-    if (msgDate && msgDate !== lastDate) {
-      const dd = document.createElement('div');
-      dd.className = 'ddiv';
-      dd.textContent = msgDate;
-      el.appendChild(dd);
-      lastDate = msgDate;
-    }
-    
-    el.appendChild(mkBub(msg));
-  });
-  
-  if ((chats[activeChat] || {}).typing) {
-    const r = document.createElement('div');
-    r.className = 'mrow in';
-    r.innerHTML = '<div class="mwrap"><div class="bub in typbub"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>';
-    el.appendChild(r);
-  }
-  
+  const raw = (document.getElementById('sinp')?.value || '');
+  const q = raw.toLowerCase().trim();
+  const box = document.getElementById('sinp-suggestions');
+  if (!box) return;
+  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  // If user types @prefix — match username by prefix (startsWith).
+  const isAt = q.startsWith('@');
+  const core = isAt ? q.slice(1) : q;
+
+  // Filter loaded users (we already listen to users via setupChatsListener)
+  const matches = users.filter(u => {
+    if (!u) return false;
+    const name = (u.name || '').toLowerCase();
+    const uname = (u.username || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    if (isAt) return uname.startsWith(core) && uname.length;
+    // Otherwise, general contains search across name/username/email
+    return (name && name.includes(core)) || (uname && uname.includes(core)) || (email && email.includes(core));
+  }).slice(0, 8);
+
+  if (!matches.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  box.innerHTML = matches.map(u => {
+    const initials = (u.name || '').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() || (u.username||'').slice(0,2).toUpperCase();
+    // Show username prominently when available (especially for @ searches). Do not show email.
+    const main = u.username ? ('@' + u.username) : (u.name || 'Пользователь');
+    const sub = (u.username && u.name) ? (' · ' + u.name) : '';
+    return `<div class="sugg-item" data-uid="${u.id}" style="display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:6px;cursor:pointer">
+      <div style="width:36px;height:36px;border-radius:50%;background:${u.color||CLR[0]};display:flex;align-items:center;justify-content:center;font-weight:700;color:#111">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(main)}</div>
+        <div style="font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sub)}</div>
+      </div>
+    </div>`;
+  }).join('');
   el.scrollTop = el.scrollHeight;
 }
 
