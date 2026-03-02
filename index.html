@@ -112,6 +112,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 /* ── ICON BUTTON ── */
 .ib{width:34px;height:34px;border-radius:9px;background:none;border:none;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:.15s}
 .ib:hover{background:var(--s2);color:var(--t2)}
+.sfb, .sndbtn, .ib, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent }
 
 /* ── MESSAGE BUBBLES ── */
 .mrow{display:flex;padding:6px 0;margin-bottom:10px;width:100%}
@@ -630,6 +631,37 @@ const CLR = ['#d0d0d0','#b8b8b8','#a0a0a0','#888','#707070','#c8b9a0','#b8a88a',
 let me = null;
 let users = [];
 let chats = {};
+// Local persistence for chats/messages (fallback and offline)
+function saveChatsLocal() {
+  try {
+    const dump = {};
+    Object.keys(chats).forEach(k => {
+      const c = chats[k];
+      dump[k] = {
+        unread: c.unread || 0,
+        online: !!c.online,
+        typing: !!c.typing,
+        messages: (c.messages || []).map(m => ({ id: m.id, from: m.from, to: m.to, text: m.text, timestamp: m.timestamp, file: m.file }))
+      };
+    });
+    localStorage.setItem('hate_chats', JSON.stringify(dump));
+  } catch (e) { console.warn('saveChatsLocal failed', e); }
+}
+function loadChatsLocal() {
+  try {
+    const raw = localStorage.getItem('hate_chats');
+    if (!raw) return;
+    const dump = JSON.parse(raw);
+    Object.keys(dump).forEach(k => {
+      const c = dump[k];
+      if (!chats[k]) chats[k] = { messages: [], unread: 0 };
+      chats[k].unread = c.unread || 0;
+      chats[k].online = !!c.online;
+      chats[k].typing = !!c.typing;
+      chats[k].messages = (c.messages || []).slice();
+    });
+  } catch (e) { console.warn('loadChatsLocal failed', e); }
+}
 // contacts stored locally as array of user ids; users must be added via @ search
 function getContacts() {
   try { return JSON.parse(localStorage.getItem('hate_contacts') || '[]') || []; } catch (e) { return []; }
@@ -873,6 +905,9 @@ function afterAuth(user) {
   setupChatsListener();
   applyTheme();
   fillProf();
+  // Load local chats/messages so user sees recent history even if Firestore is slow or blocked
+  loadChatsLocal();
+  renderCL();
   
   // Mobile: hide sidebar on small screens
   // Mobile: keep sidebar visible on initial load; when a chat is opened we add .msgview which will hide the sidebar
@@ -992,6 +1027,8 @@ function setupMessagesListener(chatId) {
     });
 
     chats[chatId].messages = arr;
+    // persist messages locally
+    saveChatsLocal();
 
     if (activeChat === chatId) {
       renderMsgs();
@@ -1377,10 +1414,13 @@ async function sendMsg() {
     if (!chats[activeChat]) chats[activeChat] = { messages: [], unread: 0 };
     chats[activeChat].messages.push(localMsg);
     renderMsgs();
+    saveChatsLocal();
   } catch (e) { console.warn('Local render failed', e); }
 
   try {
     await db.collection('messages').add(msg);
+    // After successful send, reload messages listener will fetch and save. Still save locally as backup
+    saveChatsLocal();
   } catch (e) {
     console.error('Failed to send message', e);
     showNotif('Ошибка отправки сообщения');
