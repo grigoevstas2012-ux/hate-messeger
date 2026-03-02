@@ -20,8 +20,11 @@
 html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden;font-size:14px}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
 
+/* Improve iOS Safari touch scrolling for overflow containers */
+#chatlist, #msgs, #rpanel, .psbod { -webkit-overflow-scrolling: touch; }
+
 /* ── LAYOUT ── */
-#app{display:flex;height:100vh}
+#app{display:flex;height:calc(var(--vh, 1vh) * 100)}
 #sidebar{width:310px;min-width:310px;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;transition:width .3s,min-width .3s;overflow:hidden}
 #sidebar.off{width:0;min-width:0}
 #main{flex:1;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;position:relative}
@@ -2109,6 +2112,22 @@ setTimeout(() => {
       if (hdr) { flash(hdr); tglInfo(); ev.preventDefault(); ev.stopPropagation(); }
     }catch(e){ console.warn('elementFromPoint click err', e); }
   }, true);
+})();
+</script>
+<script>
+// Fix for mobile Safari viewport height issues: set CSS variable --vh
+(function(){
+  function setVh(){
+    try{
+      var vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', vh + 'px');
+    }catch(e){/* ignore */}
+  }
+  setVh();
+  window.addEventListener('resize', setVh);
+  window.addEventListener('orientationchange', setVh);
+  // also update when page becomes visible again
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) setVh(); });
 })();
 </script>
 </body>
