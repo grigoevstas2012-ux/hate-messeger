@@ -2028,5 +2028,37 @@ setTimeout(() => {
   }, true);
 })();
 </script>
+<script>
+// Strong fallback using elementFromPoint to detect top element under the tap
+(function(){
+  function flash(el){
+    try{
+      el.style.outline = '2px solid rgba(255,0,0,.9)';
+      setTimeout(()=>{ el.style.outline = ''; }, 400);
+    }catch(e){}
+  }
+
+  document.addEventListener('touchend', function(ev){
+    try{
+      if (!infoOpen) return;
+      const t = ev.changedTouches && ev.changedTouches[0]; if(!t) return;
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      if (!el) return;
+      const hdr = el.closest && el.closest('.rphdr');
+      if (hdr) { flash(hdr); tglInfo(); ev.preventDefault(); ev.stopPropagation(); }
+    }catch(e){ console.warn('elementFromPoint touchend err', e); }
+  }, true);
+
+  document.addEventListener('click', function(ev){
+    try{
+      if (!infoOpen) return;
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      if (!el) return;
+      const hdr = el.closest && el.closest('.rphdr');
+      if (hdr) { flash(hdr); tglInfo(); ev.preventDefault(); ev.stopPropagation(); }
+    }catch(e){ console.warn('elementFromPoint click err', e); }
+  }, true);
+})();
+</script>
 </body>
 </html>
