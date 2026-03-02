@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hate</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='28' font-size='28' font-family='serif' font-weight='bold'>H</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a; --s1:#111; --s2:#181818; --s3:#222; --s4:#333;
+  --t1:#f0f0f0; --t2:#aaa; --t3:#666; --t4:#444;
+  --bd:rgba(255,255,255,.07); --bd2:rgba(255,255,255,.11);
+  --out:#1a1a1a; --in:#131313;
+  --acc:#e8e8e8; --red:#ff5252;
+  --on:#d0d0d0;
+}
+
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden;font-size:14px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
+
+/* ── LAYOUT ── */
+#app{display:flex;height:100vh}
+#sidebar{width:310px;min-width:310px;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;transition:width .3s,min-width .3s;overflow:hidden}
+#sidebar.off{width:0;min-width:0}
+#main{flex:1;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;position:relative}
+#rpanel{width:290px;min-width:290px;background:var(--s1);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto;animation:sldR .2s ease}
+#rpanel.off{display:none}
+
+/* ── SIDEBAR ── */
+#sbhdr{height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.logo{font-size:21px;font-weight:800;letter-spacing:-1.5px;flex:1;color:var(--t1)}
+.logo em{font-style:normal;font-weight:300;color:var(--t3)}
+#sbsearch{padding:9px 12px;border-bottom:1px solid var(--bd);flex-shrink:0;position:relative}
+#sbsearch input{width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:10px;padding:8px 12px 8px 34px;color:var(--t1);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+#sbsearch input:focus{border-color:var(--s4)}
+#sbsearch input::placeholder{color:var(--t3)}
+.sico{position:absolute;left:22px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none}
+#chatlist{flex:1;overflow-y:auto;padding:3px 0}
+.ci{display:flex;align-items:center;padding:9px 13px;gap:11px;cursor:pointer;transition:background .15s;position:relative;animation:sldL .2s ease both}
+.ci:hover{background:var(--s2)}
+.ci.act{background:var(--s2);border-right:2px solid var(--t1)}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#111;flex-shrink:0;position:relative;letter-spacing:-.5px}
+.av46{width:46px;height:46px;font-size:15px}
+.av36{width:36px;height:36px;font-size:12px}
+.av72{width:72px;height:72px;font-size:24px}
+.av90{width:90px;height:90px;font-size:30px}
+.odot{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--on);border:2px solid var(--s1)}
+.cinf{flex:1;min-width:0}
+.crow1{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.cname{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:165px}
+.ctime{font-size:11px;color:var(--t3);flex-shrink:0}
+.crow2{display:flex;justify-content:space-between;align-items:center}
+.cprev{font-size:12.5px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:190px}
+.cprev.typ{color:var(--t2);font-style:italic}
+.ubadge{background:var(--t1);color:#111;border-radius:10px;padding:1px 6px;font-size:10.5px;font-weight:700;flex-shrink:0}
+#sbfoot{border-top:1px solid var(--bd);padding:8px 6px;display:flex;gap:2px;flex-shrink:0}
+.sfb{flex:1;display:flex;flex-direction:column;align-items:center;padding:7px 3px;border-radius:9px;background:none;border:none;color:var(--t3);cursor:pointer;font-family:inherit;font-size:9.5px;gap:4px;transition:.2s}
+.sfb:hover{background:var(--s2);color:var(--t2)}
+.sfb.act{color:var(--t1)}
+
+
+.fwd{font-size:10.5px;color:var(--t3);margin-bottom:4px}
+.rcs{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.rc{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:2px 7px;font-size:13px;cursor:pointer;transition:.12s;user-select:none}
+.rc:hover{background:rgba(255,255,255,.12);transform:scale(1.08)}
+.macts{position:absolute;top:-30px;display:flex;gap:3px;opacity:0;pointer-events:none;transition:opacity .15s}
+.out .macts{left:0}.in .macts{right:0}
+.mwrap:hover .macts{opacity:1;pointer-events:all}
+.mab{background:var(--s2);border:1px solid var(--bd2);border-radius:9px;padding:4px 7px;cursor:pointer;font-size:13px;color:var(--t2);transition:.12s}
+.mab:hover{background:var(--s3);color:var(--t1)}
+.epick{position:absolute;bottom:calc(100% + 5px);background:var(--s2);border:1px solid var(--bd2);border-radius:13px;padding:7px 9px;display:flex;gap:3px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:300;animation:mpop .14s ease}
+.out .epick{right:0}.in .epick{left:0}
+.emb{background:none;border:none;cursor:pointer;font-size:17px;border-radius:7px;padding:3px;transition:transform .1s}
+.emb:hover{transform:scale(1.35)}
+.typbub{display:flex;align-items:center;gap:4px;padding:11px 14px}
+.td{width:6px;height:6px;border-radius:50%;background:var(--t4);animation:tdot 1.4s infinite}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+.ddiv{text-align:center;padding:9px 0;font-size:11px;color:var(--t4);letter-spacing:.5px}
+.fatt{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.04);border-radius:9px;padding:8px 11px;margin-bottom:4px;min-width:190px}
+.ficn{font-size:26px}
+.fnm{font-size:12.5px;font-weight:600}
+.fsz{font-size:10.5px;color:var(--t3)}
+
+/* ── BARS ── */
+.bar{padding:8px 14px;background:var(--s1);border-top:1px solid var(--bd);display:flex;align-items:center;gap:11px}
+.bar.off{display:none}
+.bline{flex:1;border-left:2px solid var(--t4);padding-left:9px}
+.bline.e{border-color:var(--t2)}
+.blbl{font-size:10.5px;font-weight:600;color:var(--t2);margin-bottom:2px}
+.blbl.e{color:var(--acc)}
+.btxt{font-size:12px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── INPUT ── */
+#inpwrap{padding:9px 14px 13px;background:var(--bg);border-top:1px solid var(--bd);flex-shrink:0}
+#inprow{display:flex;align-items:flex-end;gap:8px;background:var(--s1);border:1px solid var(--bd2);border-radius:15px;padding:5px 5px 5px 11px;transition:border-color .2s}
+#inprow:focus-within{border-color:var(--s4)}
+#msginp{flex:1;background:none;border:none;color:var(--t1);font-size:14.5px;font-family:inherit;outline:none;resize:none;max-height:120px;line-height:1.5;padding:4px 0}
+#msginp{flex:1;background:none;border:none;color:var(--t1);font-size:14.5px;font-family:inherit;outline:none;resize:none;max-height:120px;line-height:1.5;padding:4px 0;min-height:28px}
+#msginp::placeholder{color:var(--t4)}
+.inpb{width:34px;height:34px;border-radius:9px;background:none;border:none;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.inpb:hover{background:var(--s3);color:var(--t2)}
+.sndbtn{width:36px;height:36px;border-radius:11px;background:var(--t1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.sndbtn:hover{background:var(--acc);transform:scale(1.06)}
+.sndbtn svg{color:#111}
+.atpop{position:absolute;bottom:calc(100% + 7px);left:0;background:var(--s2);border:1px solid var(--bd2);border-radius:13px;padding:5px 0;min-width:165px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;animation:mpop .14s ease;z-index:200}
+.atpop.op{display:block}
+.api{padding:9px 15px;cursor:pointer;font-size:13.5px;color:var(--t2);display:flex;align-items:center;gap:9px;transition:background .1s}
+.api:hover{background:var(--s3);color:var(--t1)}
+
+/* ── ICON BUTTON ── */
+.ib{width:34px;height:34px;border-radius:9px;background:none;border:none;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:.15s}
+.ib:hover{background:var(--s2);color:var(--t2)}
+.sfb, .sndbtn, .ib, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent }
+
+/* ── MESSAGE BUBBLES ── */
+.mrow{display:flex;padding:6px 0;margin-bottom:10px;width:100%}
+.mrow.out{justify-content:flex-end;padding-right:20px}
+.mrow.in{justify-content:flex-start;padding-left:20px}
+.mwrap{display:flex;flex-direction:column;align-items:flex-start;max-width:85%;gap:6px}
+.mrow.out .mwrap{align-items:flex-end}
+.bub{display:inline-block;padding:10px 14px;border-radius:14px;line-height:1.35;word-break:break-word;white-space:pre-wrap;box-shadow:0 4px 12px rgba(0,0,0,0.24)}
+.mrow.in .bub{background:#2f2f2f;color:var(--t1);border-bottom-left-radius:8px;border-bottom-right-radius:14px}
+.mrow.out .bub{background:var(--t1);color:#111;border-bottom-right-radius:8px;border-bottom-left-radius:14px}
+.bub img{border-radius:12px}
+.mmeta{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:11px;color:var(--t3);justify-content:flex-end}
+
+/* Adaptive bubble width: shrink for short messages, allow expansion for long */
+.bub{min-width:56px;max-width:72ch}
+/* timestamp inside bubble */
+.bub .mtime{display:block;font-size:11px;color:var(--t3);opacity:.9;margin-top:6px}
+
+/* Chat messages container padding so bubbles don't stick to edges */
+#msgs{flex:1;overflow-y:auto;padding:18px 24px}
+
+
+/* ── RIGHT PANEL ── */
+.rphdr{height:58px;display:flex;align-items:center;padding:0 14px;gap:11px;border-bottom:1px solid var(--bd);flex-shrink:0;position:relative}
+.rphdr-close-area{position:absolute;left:0;top:0;right:0;bottom:0;background:transparent;border:none;cursor:pointer}
+.rphdr{cursor:pointer}
+.rptit{font-size:15px;font-weight:700}
+.rpavwp{padding:26px 0 18px;display:flex;flex-direction:column;align-items:center;gap:9px;border-bottom:1px solid var(--bd)}
+.rpname{font-size:17px;font-weight:700}
+.rpsub{font-size:12.5px;color:var(--t3)}
+.rpbdg{padding:3px 11px;border-radius:18px;font-size:11px;font-weight:600;border:1px solid var(--bd2)}
+.rpbdg.on{border-color:var(--t2);color:var(--t2)}
+.rpsec{padding:14px;border-bottom:1px solid var(--bd)}
+.rpstit{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--t4);margin-bottom:11px}
+.rpr{display:flex;align-items:center;gap:11px;padding:9px 7px;border-radius:9px;cursor:pointer;transition:background .13s;color:var(--t2);font-size:13.5px}
+.rpr:hover{background:var(--s2);color:var(--t1)}
+.rpr .lbl{flex:1}
+.rpr .val{font-size:11.5px;color:var(--t4)}
+.rpr.red{color:var(--red)}
+.rpr.red:hover{background:rgba(255,82,82,.08)}
+
+/* ── CTX MENU ── */
+#ctx{position:fixed;background:var(--s2);border:1px solid var(--bd2);border-radius:13px;padding:5px 0;min-width:185px;box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:1000;display:none;animation:mpop .14s ease}
+#ctx.op{display:block}
+.cxi{padding:9px 15px;cursor:pointer;font-size:13.5px;color:var(--t2);display:flex;align-items:center;gap:9px;transition:background .1s}
+.cxi:hover{background:var(--s3);color:var(--t1)}
+.cxi.red{color:var(--red)}
+.cxi.red:hover{background:rgba(255,82,82,.08)}
+.cxi.dim{opacity:.35;pointer-events:none}
+.cxsep{height:1px;background:var(--bd);margin:4px 0}
+
+/* ── PANEL SCREENS ── */
+.pscr{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;flex-direction:column;animation:sldUp .22s ease}
+.pscr.off{display:none}
+.pshdr{height:58px;display:flex;align-items:center;padding:0 18px;gap:13px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.pstit{font-size:18px;font-weight:700;flex:1}
+.psbod{flex:1;overflow-y:auto}
+.pssec{padding:18px 22px;border-bottom:1px solid var(--bd)}
+.psslbl{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--t4);margin-bottom:13px}
+.psr{display:flex;align-items:center;padding:11px 0;gap:13px;border-bottom:1px solid var(--bd);cursor:pointer;transition:.15s}
+.psr:last-child{border:none}
+.psr:hover .psrl{color:var(--t1)}
+.psri{font-size:17px;width:26px;text-align:center}
+.psrl{flex:1;font-size:14px;color:var(--t2)}
+.psrv{font-size:12.5px;color:var(--t4)}
+.psrr{color:var(--t4);font-size:12px}
+.psr.red .psrl{color:var(--red)}
+.psinp{width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:11px;padding:11px 13px;color:var(--t1);font-size:13.5px;font-family:inherit;outline:none;transition:border-color .2s;margin-top:7px}
+.psinp:focus{border-color:var(--s4)}
+.pssavebtn{margin-top:15px;padding:11px 22px;background:var(--t1);color:#111;border:none;border-radius:11px;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s}
+.pssavebtn:hover{background:var(--acc)}
+.tgl{width:42px;height:24px;position:relative;flex-shrink:0;cursor:pointer}
+.tgl input{display:none}
+.tgltr{width:100%;height:100%;background:var(--s4);border-radius:12px;transition:background .2s;position:relative}
+.tgl input:checked~.tgltr{background:var(--t3)}
+.tglth{position:absolute;top:3px;left:3px;width:18px;height:18px;background:var(--t1);border-radius:50%;transition:transform .2s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.tgl input:checked~.tgltr .tglth{transform:translateX(18px)}
+.paed{position:relative;display:inline-block;cursor:pointer}
+.aovl{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;font-size:17px}
+.paed:hover .aovl{opacity:1}
+
+/* ── AUTH ── */
+#auth{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center}
+#auth.off{display:none}
+.acard{background:var(--s1);border:1px solid var(--bd2);border-radius:18px;padding:40px 36px;width:370px;box-shadow:0 24px 64px rgba(0,0,0,.6);animation:crdIn .32s cubic-bezier(.34,1.56,.64,1)}
+.alogo{font-size:34px;font-weight:800;letter-spacing:-2px;margin-bottom:5px}
+.alogo em{font-style:normal;font-weight:200;color:var(--t3)}
+.asub{font-size:13px;color:var(--t3);margin-bottom:28px}
+.atabs{display:flex;background:var(--s2);border-radius:11px;padding:4px;margin-bottom:26px}
+.atab{flex:1;padding:8px;border-radius:8px;background:none;border:none;color:var(--t4);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.atab.act{background:var(--s1);color:var(--t1)}
+.albl{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--t4);margin-bottom:7px}
+.ainp{width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:11px;padding:11px 14px;color:var(--t1);font-size:14px;font-family:inherit;outline:none;margin-bottom:14px;transition:border-color .2s}
+.ainp:focus{border-color:var(--s4)}
+.ainp::placeholder{color:var(--t4)}
+.abtn{width:100%;padding:12px;background:var(--t1);color:#111;border:none;border-radius:11px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s}
+.abtn:hover{background:var(--acc);transform:translateY(-1px)}
+.aerr{font-size:12px;color:var(--red);margin-bottom:11px;text-align:center}
+
+/* ── EMPTY ── */
+#empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;color:var(--s4)}
+.elogo{font-size:52px;font-weight:800;letter-spacing:-4px}
+.esub{font-size:13.5px;color:var(--t4)}
+
+/* ── NOTIF ── */
+#notif{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s2);border:1px solid var(--bd2);color:var(--t1);padding:9px 20px;border-radius:18px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:2000;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;white-space:nowrap}
+#notif.sh{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── DIALOG ── */
+.dov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:800;display:flex;align-items:center;justify-content:center;animation:fIn .18s}
+.dov.off{display:none}
+.dbox{background:var(--s1);border:1px solid var(--bd2);border-radius:16px;padding:22px;width:330px;box-shadow:0 16px 48px rgba(0,0,0,.6);animation:crdIn .22s cubic-bezier(.34,1.56,.64,1)}
+.dtit{font-size:15px;font-weight:700;margin-bottom:14px}
+.dcancel{width:100%;margin-top:9px;padding:10px;border-radius:9px;border:1px solid var(--bd2);background:none;color:var(--t3);font-family:inherit;font-size:13.5px;cursor:pointer;transition:.15s}
+.dcancel:hover{background:var(--s2);color:var(--t2)}
+
+/* ── ANIMATIONS ── */
+@keyframes bIn{from{opacity:0;transform:scale(.93) translateY(6px)}to{opacity:1;transform:none}}
+@keyframes sldL{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes sldR{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@keyframes sldUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fIn{from{opacity:0}to{opacity:1}}
+@keyframes crdIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes mpop{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:none}}
+@keyframes tdot{0%,80%,100%{transform:scale(.65);opacity:.45}40%{transform:scale(1);opacity:1}}
+
+/* Message enter animation */
+@keyframes bubPop {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.bub.enter { animation: bubPop .24s cubic-bezier(.2,.9,.3,1) both; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  /* On mobile show main by default (list + empty view). When a chat is opened we add .msgview to hide sidebar */
+  #sidebar{width:100%;min-width:100%;border-right:none}
+  #main{display:flex}
+  #rpanel{display:none}
+  #app.msgview #sidebar{display:none}
+  #app.msgview #main{display:flex}
+  /* show rpanel only when message view AND explicit info-open flag are set */
+  #app.msgview.info-open #rpanel{display:flex}
+  #msgs{padding:12px 5%}#topbar{height:56px;padding:0 12px}
+  .mwrap{max-width:85%}#inpwrap{padding:7px 12px 10px}.inpb{width:32px;height:32px}
+  .sndbtn{width:34px;height:34px}.cname{max-width:140px}.cprev{max-width:160px}
+  .sfb{font-size:8.5px;padding:5px 2px}
+
+  /* Mobile message bubble adjustments */
+  .mrow{padding:6px 8px}
+  .mwrap{max-width:92%}
+  .bub{max-width:78%;padding:10px 12px;font-size:15px}
+  .mrow.out .bub{border-radius:16px 16px 6px 16px}
+  .mrow.in .bub{border-radius:16px 16px 16px 6px}
+
+  /* Input area tweaks */
+  #inprow{padding:6px;gap:6px}
+  #msginp{font-size:15px;min-height:36px}
+  .sndbtn{width:40px;height:40px;border-radius:12px}
+  #anonBtn{width:34px;height:34px}
+
+  /* Ensure msgs scroll area fits above sticky input */
+  #msgs{padding-bottom:80px}
+}
+
+@media (max-width: 480px) {
+  .mwrap{max-width:90%}#msgs{padding:10px 3%}#inpwrap{padding:6px 8px}
+  .bub{padding:8px 11px;font-size:13.5px}.av46{width:40px;height:40px;font-size:13px}
+  .cname{font-size:13px}.cprev{font-size:11.5px}#topbar{height:52px;padding:0 10px;font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth">
+  <div class="acard">
+    <div class="alogo">H<em>ate</em></div>
+    <div class="asub">Зашифрованный мессенджер</div>
+    <div class="atabs">
+      <button class="atab act" id="tl" onclick="stab('l')">Войти</button>
+      <button class="atab" id="tr" onclick="stab('r')">Регистрация</button>
+    </div>
+    <div id="aerr" class="aerr" style="display:none"></div>
+    <div id="fl">
+      <div class="albl">Email</div>
+      <input id="le" class="ainp" type="email" placeholder="email@example.com" onkeydown="if(event.key==='Enter')login()"/>
+      <div class="albl">Пароль</div>
+      <input id="lp" class="ainp" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/>
+      <button class="abtn" onclick="login()">Войти</button>
+    </div>
+    <div id="fr" style="display:none">
+      <div class="albl">Имя</div>
+      <input id="rn" class="ainp" type="text" placeholder="Ваше имя" maxlength="40"/>
+      <div class="albl">Email</div>
+      <input id="re" class="ainp" type="email" placeholder="email@example.com"/>
+      <div class="albl">Пароль</div>
+      <input id="rp" class="ainp" type="password" placeholder="Минимум 8 символов (заглавная буква + цифра)" onkeydown="if(event.key==='Enter')register()"/>
+      <button class="abtn" onclick="register()">Создать аккаунт</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sbhdr">
+      <button class="ib" onclick="tglSb()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </button>
+      <div class="logo">H<em>ate</em></div>
+      <button class="ib" onclick="cycleTheme()" title="Тема">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+      </button>
+      <button class="ib" onclick="setPreferredView('mobile')" title="Открыть мобильную версию" style="margin-left:6px">📱</button>
+    </div>
+    <div id="sbsearch">
+      <svg class="sico" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input id="sinp" placeholder="Поиск" oninput="onSearchInput()" onfocus="onSearchInput()" autocomplete="off"/>
+      <div id="sinp-suggestions" style="display:none;position:absolute;left:12px;right:12px;top:44px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:400;max-height:260px;overflow:auto"></div>
+    </div>
+    <div id="chatlist"></div>
+    <div id="sbfoot">
+      <button class="sfb" onclick="openP('settings')" title="Настройки">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        Настройки
+      </button>
+      <button class="sfb" onclick="openP('profile')" title="Профиль">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        Профиль
+      </button>
+      <button class="sfb" onclick="openP('privacy')" title="Приватность">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        Конфид.
+      </button>
+      <button class="sfb" onclick="logout()" title="Выйти">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        Выйти
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="empty">
+      <div class="elogo">Hate</div>
+      <div class="esub">Выберите чат чтобы начать</div>
+    </div>
+    <div id="chatview" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <div id="topbar">
+        <button class="ib" onclick="tglSb()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </button>
+        <div class="tbuser" id="tbuser" onclick="tglInfo()">
+          <div class="av av36" id="tbav"></div>
+          <div>
+            <div class="tbname" id="tbname"></div>
+            <div class="tbst" id="tbst"></div>
+          </div>
+        </div>
+        <div class="tbacts">
+          <button class="ib" id="encbtn" onclick="tglEnc()" title="E2E шифрование">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+          </button>
+          <button class="ib" onclick="tglInfo()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="rplybar" class="bar off">
+        <div class="bline"><div class="blbl" id="rplywho"></div><div class="btxt" id="rplytxt"></div></div>
+        <button class="ib" onclick="clrReply()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
+      <div id="editbar" class="bar off">
+        <div class="bline e"><div class="blbl e">✏ Редактирование</div><div class="btxt" id="edittxt"></div></div>
+        <button class="ib" onclick="clrEdit()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
+      <div id="msgs"></div>
+      <div id="inpwrap">
+        <div id="inprow">
+          <div style="position:relative">
+            <button class="inpb" onclick="tglAt(event)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+            </button>
+            <div id="atmenu" class="atpop">
+              <div class="api" onclick="trigF('image/*,video/*')">📷 Фото / Видео</div>
+              <div class="api" onclick="trigF('*')">📎 Файл</div>
+              <div class="api" onclick="fkVoice()">🎤 Голосовое</div>
+              <div class="api" onclick="showNotif('📍 Геолокация — скоро');clsAt()">📍 Геолокация</div>
+            </div>
+          <button id="anonBtn" class="inpb" title="Анонимно" onclick="toggleAnon()">🕶️</button>
+          </div>
+          <textarea id="msginp" placeholder="Сообщение..." rows="1"
+            oninput="autoRz(this);onTyp()"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+          <button class="sndbtn" onclick="sendMsg()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="rpanel" class="off">
+    <div id="rphdr" class="rphdr">
+      <button class="ib"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      <div class="rptit">Информация</div>
+      <button class="rphdr-close-area" onclick="tglInfo()" aria-label="close"></button>
+    </div>
+    <div class="rpavwp">
+      <div class="av av72" id="rpav"></div>
+      <div class="rpname" id="rpnm"></div>
+      <div class="rpsub" id="rpsub"></div>
+      <div class="rpbdg" id="rpbdg"></div>
+    </div>
+    <div class="rpsec">
+      <div class="rpstit">Действия</div>
+      <div class="rpr" onclick="tglEnc()"><span>🔒</span><span class="lbl">Шифрование</span><span class="val" id="rpenc">Выкл</span></div>
+      <div class="rpr" onclick="showNotif('🔔 Уведомления изменены')"><span>🔔</span><span class="lbl">Уведомления</span><span class="val">Вкл</span></div>
+      <div class="rpr" onclick="clearHist()"><span>🗑</span><span class="lbl">Очистить историю</span></div>
+      <div class="rpr red" onclick="showNotif('Пользователь заблокирован')"><span>🚫</span><span class="lbl">Заблокировать</span></div>
+    </div>
+    <div class="rpsec">
+      <div class="rpstit">Медиа</div>
+      <div id="rpmedia" style="display:flex;flex-wrap:wrap;gap:3px;min-height:36px"></div>
+    </div>
+    <div class="rpsec" style="font-size:11.5px;color:var(--t4);line-height:1.65" id="rp-enc-note">
+      Стандартное шифрование при передаче.    
+    </div>
+  </div>
+</div>
+
+<!-- PANELS -->
+
+<!-- SETTINGS -->
+<div id="panel-settings" class="pscr off">
+  <div class="pshdr">
+    <button class="ib" onclick="closeP('settings')"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <div class="pstit">Настройки</div>
+  </div>
+  <div class="psbod">
+    <div class="pssec">
+      <div class="psslbl">Аккаунт</div>
+      <div class="psr" onclick="openP('profile')"><span class="psri">👤</span><span class="psrl">Редактировать профиль</span><span class="psrr">›</span></div>
+      <div class="psr" onclick="openP('privacy')"><span class="psri">🔒</span><span class="psrl">Конфиденциальность</span><span class="psrr">›</span></div>
+      <div class="psr" onclick="showNotif('Уведомления настроены')"><span class="psri">🔔</span><span class="psrl">Уведомления</span><span class="psrr">›</span></div>
+    </div>
+    <div class="pssec">
+      <div class="psslbl">Внешний вид</div>
+      <div class="psr" style="cursor:default">
+        <span class="psri">🎨</span><span class="psrl">Тема</span>
+        <div style="display:flex;gap:5px">
+          <button onclick="setTheme('dark')" id="tdark" style="padding:4px 10px;border-radius:7px;border:1px solid var(--bd2);background:var(--s3);color:var(--t1);cursor:pointer;font-size:12px;font-family:inherit">Тёмная</button>
+          <button onclick="setTheme('light')" id="tlight" style="padding:4px 10px;border-radius:7px;border:1px solid var(--bd2);background:none;color:var(--t4);cursor:pointer;font-size:12px;font-family:inherit">Светлая</button>
+        </div>
+      </div>
+      <div class="psr" style="cursor:default">
+        <span class="psri">✍</span><span class="psrl">Размер текста</span>
+        <input type="range" min="12" max="19" value="14" step="1" style="width:80px;accent-color:var(--t1)" oninput="document.querySelectorAll('.bub').forEach(b=>b.style.fontSize=this.value+'px')"/>
+      </div>
+    </div>
+    <div class="pssec">
+      <div class="psslbl">Поведение</div>
+      <div class="psr" style="cursor:default"><span class="psri">↩</span><span class="psrl">Enter отправляет</span><label class="tgl"><input type="checkbox" checked/><div class="tgltr"><div class="tglth"></div></div></label></div>
+      <div class="psr" style="cursor:default"><span class="psri">✓✓</span><span class="psrl">Показывать прочтение</span><label class="tgl"><input type="checkbox" checked/><div class="tgltr"><div class="tglth"></div></div></label></div>
+      <div class="psr" style="cursor:default"><span class="psri">⌨</span><span class="psrl">Показывать «печатает»</span><label class="tgl"><input type="checkbox" checked/><div class="tgltr"><div class="tglth"></div></div></label></div>
+      <div class="psr" style="cursor:default"><span class="psri">🔔</span><span class="psrl">Звук уведомлений</span><label class="tgl"><input type="checkbox"/><div class="tgltr"><div class="tglth"></div></div></label></div>
+    </div>
+    <div class="pssec">
+      <div class="psslbl">О приложении</div>
+      <div class="psr" style="cursor:default"><span class="psri">ℹ</span><span class="psrl">Версия</span><span class="psrv">2.0.0</span></div>
+      <div class="psr red" onclick="logout()"><span class="psri">🚪</span><span class="psrl">Выйти из аккаунта</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="panel-profile" class="pscr off">
+  <div class="pshdr">
+    <button class="ib" onclick="closeP('profile')"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <div class="pstit">Профиль</div>
+  </div>
+  <div class="psbod">
+    <div class="pssec" style="display:flex;flex-direction:column;align-items:center;padding:28px 22px">
+      <div class="paed" onclick="showNotif('Нажмите для загрузки фото')">
+        <div class="av av90" id="profav" style="margin-bottom:12px"></div>
+        <div class="aovl">📷</div>
+      </div>
+      <div style="font-size:11.5px;color:var(--t4)">Нажмите для смены фото</div>
+    </div>
+    <div class="pssec"><div class="psslbl">Имя</div><input class="psinp" id="pname" type="text" placeholder="Ваше имя"/></div>
+    <div class="pssec"><div class="psslbl">Юзернейм</div><input class="psinp" id="pusr" type="text" placeholder="@username" oninput="onUsernameInput()"/><div id="pusr-msg" class="aerr" style="display:none;margin-top:8px;font-size:12px"></div></div>
+    <div class="pssec"><div class="psslbl">О себе</div><input class="psinp" id="pbio" type="text" placeholder="Расскажите о себе..."/></div>
+    <div class="pssec">
+      <div class="psslbl">Email</div>
+      <input class="psinp" id="pemail" type="email" readonly style="opacity:.45"/>
+      <div style="font-size:11.5px;color:var(--t4);margin-top:7px">Email нельзя изменить</div>
+    </div>
+    <div style="padding:0 22px 28px"><button class="pssavebtn" onclick="saveProf()">Сохранить</button></div>
+  </div>
+</div>
+
+<!-- PRIVACY -->
+<div id="panel-privacy" class="pscr off">
+  <div class="pshdr">
+    <button class="ib" onclick="closeP('privacy')"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <div class="pstit">Конфиденциальность</div>
+  </div>
+  <div class="psbod">
+    <div class="pssec">
+      <div class="psslbl">Видимость данных</div>
+      <div class="psr" style="cursor:default"><span class="psri">📱</span><span class="psrl">Номер телефона</span><select style="background:var(--s2);border:1px solid var(--bd2);color:var(--t2);border-radius:8px;padding:4px 8px;font-size:12px;font-family:inherit;outline:none"><option>Никто</option><option selected>Контакты</option><option>Все</option></select></div>
+      <div class="psr" style="cursor:default"><span class="psri">🕐</span><span class="psrl">Последний визит</span><select style="background:var(--s2);border:1px solid var(--bd2);color:var(--t2);border-radius:8px;padding:4px 8px;font-size:12px;font-family:inherit;outline:none"><option>Никто</option><option selected>Контакты</option><option>Все</option></select></div>
+      <div class="psr" style="cursor:default"><span class="psri">📷</span><span class="psrl">Фото профиля</span><select style="background:var(--s2);border:1px solid var(--bd2);color:var(--t2);border-radius:8px;padding:4px 8px;font-size:12px;font-family:inherit;outline:none"><option>Контакты</option><option selected>Все</option></select></div>
+    </div>
+    <div class="pssec">
+      <div class="psslbl">Переписки</div>
+      <div class="psr" style="cursor:default"><span class="psri">💬</span><span class="psrl">Статус прочтения</span><label class="tgl"><input type="checkbox" checked/><div class="tgltr"><div class="tglth"></div></div></label></div>
+      <div class="psr" style="cursor:default"><span class="psri">⌨</span><span class="psrl">«Печатает...»</span><label class="tgl"><input type="checkbox" checked/><div class="tgltr"><div class="tglth"></div></div></label></div>
+    </div>
+    <div class="pssec">
+      <div class="psslbl">Шифрование</div>
+      <div class="psr" style="cursor:default"><span class="psri">🔒</span><span class="psrl">E2E для всех чатов</span><label class="tgl"><input type="checkbox" id="e2eall" onchange="if(this.checked){showNotif('🔒 E2E включён для всех чатов')}else showNotif('E2E отключён')"/><div class="tgltr"><div class="tglth"></div></div></label></div>
+      <div class="psr" style="cursor:default"><span class="psri">💣</span><span class="psrl">Самоудаление сообщений</span>
+        <select style="background:var(--s2);border:1px solid var(--bd2);color:var(--t2);border-radius:8px;padding:4px 8px;font-size:12px;font-family:inherit;outline:none">
+          <option selected>Выкл</option><option>1 час</option><option>1 день</option><option>1 неделя</option>
+        </select>
+      </div>
+      <div style="font-size:11.5px;color:var(--t4);margin-top:9px;line-height:1.65">AES-256-GCM + ECDH P-256 через Web Crypto API.<br>Ключи хранятся только на вашем устройстве.</div>
+    </div>
+    <div class="pssec">
+      <div class="psslbl">Безопасность</div>
+      <div class="psr" style="cursor:default"><span class="psri">🔑</span><span class="psrl">Двухфакторная аутентификация</span><label class="tgl"><input type="checkbox"/><div class="tgltr"><div class="tglth"></div></div></label></div>
+      <div class="psr" onclick="showNotif('Все сессии завершены')"><span class="psri">📵</span><span class="psrl">Завершить все сессии</span><span class="psrr">›</span></div>
+      <div class="psr red" onclick="confirmDeleteAccount()"><span class="psri">💀</span><span class="psrl">Удалить аккаунт</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CTX -->
+<div id="ctx">
+  <div class="cxi" onclick="cxDo('reply')">↩ Ответить</div>
+  <div class="cxi" id="cxedit" onclick="cxDo('edit')">✏ Изменить</div>
+  <div class="cxi" onclick="cxDo('copy')">⎘ Копировать</div>
+  <div class="cxi" onclick="cxDo('forward')">→ Переслать</div>
+  <div class="cxi" onclick="cxDo('pin')">📌 Закрепить</div>
+  <div class="cxsep"></div>
+  <div class="cxi red" onclick="cxDo('del')">✕ Удалить</div>
+</div>
+
+<!-- FORWARD DIALOG -->
+<div id="fwddlg" class="dov off">
+  <div class="dbox">
+    <div class="dtit">Переслать сообщение</div>
+    <div id="fwdlist"></div>
+    <button class="dcancel" onclick="clsFwd()">Отмена</button>
+  </div>
+</div>
+
+<div id="notif"></div>
+<input type="file" id="fileinp" style="display:none" onchange="handleFile()"/>
+
+<!-- Firebase SDK v8 (COMPATIBLE - работает как глобальные переменные) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+
+<script>
+// Firebase configuration - HATE MESSENGER PROJECT
+const firebaseConfig = {
+  apiKey: "AIzaSyCVcSmwPF6XPup8L9AO-mmP3qQpXGO697w",
+  authDomain: "weed-messenger-8200e.firebaseapp.com",
+  projectId: "weed-messenger-8200e",
+  storageBucket: "weed-messenger-8200e.firebasestorage.app",
+  messagingSenderId: "165427827145",
+  appId: "1:165427827145:web:a9fac6fec1b87f226e1818",
+  measurementId: "G-BY7LCJ28RL"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Initialize Firebase modules as GLOBAL variables
+window.auth = firebase.auth();
+window.db = firebase.firestore();
+window.storage = firebase.storage();
+
+// Ensure auth persistence so sessions survive reloads (helps avoid brief null state)
+try {
+  window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+} catch (e) { /* ignore if not supported */ }
+
+// Cloud Function URL for anonymous messages (set your real URL here)
+const CLOUD_FN_ANON_URL = '' /* e.g. 'https://us-central1-your-project.cloudfunctions.net/anonMessage' */;
+
+try {
+  firebase.analytics();
+} catch (e) {
+  // Analytics might not be available, that's ok
+}
+
+console.log('✅ Firebase initialized successfully');
+console.log('📦 Project:', firebaseConfig.projectId);
+console.log('🔐 Auth:', !!window.auth);
+console.log('📚 Firestore:', !!window.db);
+
+
+// ── CONFIG ──
+const EMOJIS = ['👍','❤️','😂','😮','🔥','🎉','😢','👏','🤔','💯'];
+const CLR = ['#d0d0d0','#b8b8b8','#a0a0a0','#888','#707070','#c8b9a0','#b8a88a','#d4c4a4'];
+
+// ── STATE ──
+let me = null;
+let users = [];
+let chats = {};
+// Local persistence for chats/messages (fallback and offline)
+function saveChatsLocal() {
+  try {
+    const dump = {};
+    Object.keys(chats).forEach(k => {
+      const c = chats[k];
+      dump[k] = {
+        unread: c.unread || 0,
+        online: !!c.online,
+        typing: !!c.typing,
+        messages: (c.messages || []).map(m => ({ id: m.id, from: m.from, to: m.to, text: m.text, timestamp: m.timestamp, file: m.file }))
+      };
+    });
+    localStorage.setItem('hate_chats', JSON.stringify(dump));
+  } catch (e) { console.warn('saveChatsLocal failed', e); }
+}
+function loadChatsLocal() {
+  try {
+    const raw = localStorage.getItem('hate_chats');
+    if (!raw) return;
+    const dump = JSON.parse(raw);
+    Object.keys(dump).forEach(k => {
+      const c = dump[k];
+      if (!chats[k]) chats[k] = { messages: [], unread: 0 };
+      chats[k].unread = c.unread || 0;
+      chats[k].online = !!c.online;
+      chats[k].typing = !!c.typing;
+      chats[k].messages = (c.messages || []).slice();
+    });
+  } catch (e) { console.warn('loadChatsLocal failed', e); }
+}
+// contacts stored locally as array of user ids; users must be added via @ search
+function getContacts() {
+  try { return JSON.parse(localStorage.getItem('hate_contacts') || '[]') || []; } catch (e) { return []; }
+}
+function saveContacts(arr) { localStorage.setItem('hate_contacts', JSON.stringify(arr || [])); }
+function isContact(id) { return getContacts().indexOf(id) !== -1; }
+function addContact(id) {
+  if (!id) return;
+  const c = getContacts();
+  if (c.indexOf(id) === -1) {
+    c.push(id);
+    saveContacts(c);
+    // ensure chat entry exists
+    if (!chats[id]) chats[id] = { messages: [], unread: 0 };
+    renderCL();
+    showNotif('Контакт добавлен');
+  }
+}
+function removeContact(id) { const c = getContacts().filter(x => x !== id); saveContacts(c); renderCL(); }
+let activeChat = null;
+let enc = new Set();
+let reply = null;
+let editObj = null;
+let ctxObj = null;
+let typingTimeouts = {};
+let typingThrottle = {};
+let infoOpen = false;
+let fwdMsg = null;
+let unsubscribeChats = null;
+let unsubscribeMessages = null;
+let currentTheme = 'dark';
+
+// ── AUTH ──
+function stab(t) {
+  document.getElementById('fl').style.display = t === 'l' ? 'block' : 'none';
+  document.getElementById('fr').style.display = t === 'r' ? 'block' : 'none';
+  document.getElementById('tl').className = 'atab' + (t === 'l' ? ' act' : '');
+  document.getElementById('tr').className = 'atab' + (t === 'r' ? ' act' : '');
+  clrErr();
+}
+
+function clrErr() { 
+  const e = document.getElementById('aerr'); 
+  e.style.display = 'none'; 
+}
+
+function shErr(m) { 
+  const e = document.getElementById('aerr'); 
+  e.textContent = m; 
+  e.style.display = 'block'; 
+}
+
+async function login() {
+  const email = gv('le');
+  const password = gv('lp');
+  
+  if (!email || !password) {
+    shErr('Введите email и пароль');
+    return;
+  }
+  
+  // Wait for Firebase to load
+  if (!window.auth) {
+    console.error('❌ Firebase not loaded. Check credentials in line 541');
+    shErr('❌ Сервис авторизации не загрузился.\n\nПроверьте:\n1. Firebase Project ID в коде\n2. Включена ли Email/Password аутентификация\n3. Firestore Database создана');
+    return;
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    shErr('Пожалуйста, введите корректный email адрес');
+    return;
+  }
+  
+  try {
+    console.log('[DEBUG] Signing in with Firebase...');
+    const userCredential = await window.auth.signInWithEmailAndPassword(email, password);
+    
+    // Get ID token for backend verification
+    const idToken = await userCredential.user.getIdToken();
+    localStorage.setItem('firebase_token', idToken);
+    console.log('[DEBUG] Login successful!');
+    
+  } catch (error) {
+    let errorMsg = 'Ошибка входа';
+    
+    if (error.message.includes('user-not-found')) {
+      errorMsg = 'Пользователь не найден';
+    } else if (error.message.includes('wrong-password')) {
+      errorMsg = 'Неверный пароль';
+    } else if (error.message.includes('too-many-requests')) {
+      errorMsg = 'Слишком много попыток входа. Пожалуйста, попробуйте позже';
+    } else {
+      errorMsg = error.message || errorMsg;
+    }
+    
+    console.error('[DEBUG] Login error:', error);
+    shErr(errorMsg);
+  }
+}
+
+async function register() {
+  const name = gv('rn');
+  const email = gv('re');
+  const password = gv('rp');
+  
+  if (!name || !email || !password) {
+    shErr('Заполните все поля');
+    return;
+  }
+  
+  // Wait for Firebase to load
+  if (!window.auth || !window.db) {
+    console.error('❌ Firebase not loaded. Check credentials in line 541');
+    shErr('❌ Сервис авторизации не загрузился.\n\nПроверьте:\n1. Firebase Project ID в коде\n2. Включена ли Email/Password аутентификация\n3. Firestore Database создана');
+    return;
+  }
+  
+  // Validate name length
+  if (name.length < 2 || name.length > 50) {
+    shErr('Имя должно быть от 2 до 50 символов');
+    return;
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    shErr('Пожалуйста, введите корректный email адрес');
+    return;
+  }
+  
+  if (password.length < 8) {
+    shErr('Пароль должен быть минимум 8 символов');
+    return;
+  }
+  
+  // Check password strength
+  if (!/[A-Z]/.test(password)) {
+    shErr('Пароль должен содержать хотя бы одну заглавную букву');
+    return;
+  }
+  
+  if (!/[0-9]/.test(password)) {
+    shErr('Пароль должен содержать хотя бы одну цифру');
+    return;
+  }
+  
+  try {
+    console.log('[DEBUG] Creating Firebase user...');
+    // Create user in Firebase
+    const userCredential = await window.auth.createUserWithEmailAndPassword(email, password);
+    const uid = userCredential.user.uid;
+
+    // Update profile with name
+    await userCredential.user.updateProfile({ displayName: name });
+
+    // Get ID token for backend verification
+    const idToken = await userCredential.user.getIdToken();
+    localStorage.setItem('firebase_token', idToken);
+
+    // Create user document in Firestore with security
+    console.log('[DEBUG] Creating Firestore document...');
+    try {
+      await window.db.collection('users').doc(uid).set({
+        uid: uid,
+        name: name,
+        email: email,
+        color: CLR[Math.floor(Math.random() * CLR.length)],
+        createdAt: new Date(),
+        lastLogin: new Date(),
+        verified: false,
+        online: true
+      });
+    } catch (fsErr) {
+      console.error('[DEBUG] Firestore write failed after creating auth user', fsErr);
+      // Cleanup: delete created auth user to avoid orphaned auth accounts
+      try { await userCredential.user.delete(); } catch (delErr) { console.warn('Failed to delete orphan auth user', delErr); }
+      shErr('Ошибка регистрации: не удалось сохранить профиль. Попробуйте позже.');
+      return;
+    }
+
+    shErr('');
+    console.log('[DEBUG] Registration successful!');
+    showNotif('✅ Аккаунт создан успешно!');
+
+  } catch (error) {
+    let errorMsg = 'Ошибка регистрации';
+
+    const code = error.code || '';
+    const msg = error.message || '';
+
+    if (code.includes('email-already-in-use') || msg.includes('email-already-in-use')) {
+      // Email exists in Auth. Check if there's a user document with this email to detect mismatch.
+      try {
+        const q = await window.db.collection('users').where('email', '==', email).get();
+        if (!q.empty) {
+          errorMsg = 'Email уже зарегистрирован (профиль найден). Попробуйте войти.';
+        } else {
+          errorMsg = 'Email уже используется в системе аутентификации, но профиль не найден. Попробуйте восстановить пароль или войти.';
+        }
+      } catch (e2) {
+        console.warn('[DEBUG] Checking users by email failed', e2);
+        errorMsg = 'Email уже зарегистрирован. Попробуйте восстановить пароль.';
+      }
+    } else if (code.includes('weak-password') || msg.includes('weak-password')) {
+      errorMsg = 'Пароль слишком простой';
+    } else if (code.includes('invalid-email') || msg.includes('invalid-email')) {
+      errorMsg = 'Некорректный email адрес';
+    } else {
+      errorMsg = msg || errorMsg;
+    }
+
+    console.error('[DEBUG] Registration error:', error);
+    shErr(errorMsg);
+  }
+}
+
+function logout() {
+  // Stop presence and sign out
+  stopPresenceHeartbeat();
+  auth.signOut().then(() => {
+    localStorage.removeItem('hate_user');
+    location.reload();
+  });
+}
+
+function afterAuth(user) {
+  me = {
+    id: user.uid,
+    name: user.displayName || 'User',
+    email: user.email,
+    color: CLR[Math.floor(Math.random() * CLR.length)]
+  };
+  
+  localStorage.setItem('hate_user', JSON.stringify(me));
+  document.getElementById('auth').classList.add('off');
+  document.getElementById('app').style.display = 'flex';
+  
+  loadUsers();
+  setupChatsListener();
+  applyTheme();
+  fillProf();
+  // Load local chats/messages so user sees recent history even if Firestore is slow or blocked
+  loadChatsLocal();
+  renderCL();
+  
+  // Mobile: hide sidebar on small screens
+  // Mobile: keep sidebar visible on initial load; when a chat is opened we add .msgview which will hide the sidebar
+  if (window.innerWidth <= 768) {
+    sbOpen = true;
+    document.getElementById('sidebar').classList.remove('off');
+  }
+
+  // Presence: mark online and start heartbeat
+  startPresenceHeartbeat();
+}
+
+// Presence helpers
+let _presenceInterval = null;
+function startPresenceHeartbeat() {
+  try {
+    setOnline(true);
+    if (_presenceInterval) clearInterval(_presenceInterval);
+    _presenceInterval = setInterval(() => {
+      setOnline(true);
+    }, 30000);
+  } catch (e) { console.warn('Presence start failed', e); }
+}
+
+function stopPresenceHeartbeat() {
+  try {
+    if (_presenceInterval) clearInterval(_presenceInterval);
+    _presenceInterval = null;
+    setOnline(false);
+  } catch (e) { console.warn('Presence stop failed', e); }
+}
+
+async function setOnline(val) {
+  if (!auth || !auth.currentUser || !db) return;
+  const uid = auth.currentUser.uid;
+  try {
+    await db.collection('users').doc(uid).set({ online: !!val, lastSeen: new Date() }, { merge: true });
+  } catch (e) {
+    console.warn('setOnline failed', e);
+  }
+}
+
+// Update presence on visibility / unload
+window.addEventListener('beforeunload', () => { try { setOnline(false); } catch(e){} });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') setOnline(true); else setOnline(false);
+});
+
+// ── FIREBASE LISTENERS ──
+function setupChatsListener() {
+  if (!window.auth.currentUser) return;
+  
+  const userId = window.auth.currentUser.uid;
+  
+  // Listen to all users except current user
+  const usersQuery = window.db.collection('users').where('__name__', '!=', userId);
+  unsubscribeChats = usersQuery.onSnapshot((snapshot) => {
+    users = [];
+    snapshot.forEach((doc) => {
+      users.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Reflect typing/online state into chats structure for UI
+    const contacts = getContacts();
+    users.forEach(u => {
+      // only create chat entries for contacts or if there is existing message history
+      const hasHistory = !!(chats[u.id] && (chats[u.id].messages || []).length);
+      if (contacts.indexOf(u.id) !== -1 || hasHistory) {
+        if (!chats[u.id]) chats[u.id] = { messages: [], unread: 0 };
+        // typing if this user is typing TO me
+        chats[u.id].typing = !!(u.typingTo && me && u.typingTo === me.id);
+        // ensure online flag exists
+        chats[u.id].online = !!u.online;
+      }
+    });
+
+    renderCL();
+    if (activeChat) updTB();
+  }, (err) => {
+    console.error('[DEBUG] Users listener failed', err);
+    if (err && err.code === 'permission-denied') {
+      showNotif('Ошибка: доступ к списку пользователей запрещён (Firestore rules).');
+    } else {
+      showNotif('Ошибка загрузки пользователей.');
+    }
+  });
+  
+  // Listen to messages for all chats
+  // This will be set up when opening a specific chat
+}
+
+function setupMessagesListener(chatId) {
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+  }
+  
+  const userId = window.auth.currentUser.uid;
+  const chatRoom = [userId, chatId].sort().join('_');
+  // Avoid requiring a composite index: listen without orderBy and sort client-side
+  const messagesQuery = window.db.collection('messages').where('room', '==', chatRoom);
+
+  unsubscribeMessages = messagesQuery.onSnapshot((snapshot) => {
+    if (!chats[chatId]) {
+      chats[chatId] = { messages: [], unread: 0 };
+    }
+
+    const arr = [];
+    snapshot.forEach((doc) => {
+      arr.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Sort by timestamp serverTimestamp where possible
+    arr.sort((a, b) => {
+      const ta = a.timestamp && a.timestamp.seconds ? a.timestamp.seconds : 0;
+      const tb = b.timestamp && b.timestamp.seconds ? b.timestamp.seconds : 0;
+      return ta - tb;
+    });
+
+    chats[chatId].messages = arr;
+    // persist messages locally
+    saveChatsLocal();
+
+    if (activeChat === chatId) {
+      renderMsgs();
+    }
+    renderCL();
+  }, (err) => {
+    console.error('[DEBUG] Messages listener failed', err);
+    if (err && err.code === 'permission-denied') {
+      showNotif('Ошибка: доступ к сообщениям запрещён (Firestore rules).');
+    } else if (err && err.code === 'failed-precondition' || err && err.message && err.message.includes('requires an index')) {
+      showNotif('Ошибка: запрос к сообщениям требует индекса в Firestore. Создайте индекс в консоли Firebase.');
+    } else {
+      showNotif('Ошибка загрузки сообщений.');
+    }
+  });
+}
+
+// ── CHAT LIST ──
+function renderCL() {
+  const q = (document.getElementById('sinp')?.value || '').toLowerCase();
+  const el = document.getElementById('chatlist');
+  el.innerHTML = '';
+  
+  // Show only contacts and chats with existing history in the main list.
+  const contacts = getContacts();
+  users.filter(u => {
+    if (!u) return false;
+    const hasHistory = !!(chats[u.id] && (chats[u.id].messages||[]).length);
+    return contacts.indexOf(u.id) !== -1 || hasHistory;
+  }).forEach((u, i) => {
+    const chat = chats[u.id] || { messages: [], unread: 0 };
+    const last = chat.messages[chat.messages.length - 1];
+    
+    const d = document.createElement('div');
+    d.className = 'ci' + (activeChat === u.id ? ' act' : '');
+    d.style.animationDelay = (i * 0.04) + 's';
+    d.onclick = () => openChat(u.id);
+    
+    d.innerHTML = `
+      <div class="av av46" style="background:${u.color || CLR[0]}">${ini(u.name)}${u.online ? '<div class="odot"></div>' : ''}</div>
+      <div class="cinf">
+        <div class="crow1">
+          <span class="cname">${esc(u.name)}</span>
+          <span class="ctime">${last ? formatTime(last.timestamp) : ''}</span>
+        </div>
+        <div class="crow2">
+          <span class="cprev${chat.typing ? ' typ' : ''}">
+            ${chat.typing ? 'печатает...' : last ? (last.from === me?.id ? 'Вы: ' : '') + esc(last.text || '📎') : '<span style="color:var(--t4)">нет сообщений</span>'}
+          </span>
+          ${chat.unread > 0 ? `<span class="ubadge">${chat.unread}</span>` : ''}
+        </div>
+      </div>`;
+    
+    el.appendChild(d);
+  });
+}
+
+// ── SEARCH SUGGESTIONS ──
+function onSearchInput() {
+  renderCL();
+  renderSuggestions();
+}
+
+function renderSuggestions() {
+  const q = (document.getElementById('sinp')?.value || '').toLowerCase().trim();
+  const box = document.getElementById('sinp-suggestions');
+  if (!box) return;
+  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  // Filter loaded users (we already listen to users via setupChatsListener)
+  const matches = users.filter(u => {
+    if (!u) return false;
+    const name = (u.name || '').toLowerCase();
+    const uname = (u.username || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    return name.includes(q) || uname.includes(q) || email.includes(q);
+  }).slice(0, 8);
+
+  if (!matches.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  box.innerHTML = matches.map(u => {
+    const label = u.username ? ('@' + u.username) : (u.name || u.email || 'User');
+    const sub = u.email ? (' · ' + u.email) : '';
+    const initials = (u.name || '').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() || (u.username||'').slice(0,2).toUpperCase();
+    return `<div class="sugg-item" data-uid="${u.id}" style="display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:6px;cursor:pointer">
+      <div style="width:36px;height:36px;border-radius:50%;background:${u.color||CLR[0]};display:flex;align-items:center;justify-content:center;font-weight:700;color:#111">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(u.name || label)}</div>
+        <div style="font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc((u.username?('@'+u.username):'') + sub)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // attach handlers (use mousedown so clicks are registered before blur)
+  box.querySelectorAll('.sugg-item').forEach(el => {
+    el.addEventListener('mousedown', (ev) => {
+      ev.preventDefault();
+      const uid = el.getAttribute('data-uid');
+      if (uid) pickSuggestion(uid);
+    });
+  });
+
+  box.style.display = 'block';
+}
+
+function pickSuggestion(uid) {
+  document.getElementById('sinp').value = '';
+  document.getElementById('sinp-suggestions').style.display = 'none';
+  // When picking a suggestion, add user as contact (if not already) and open chat
+  if (!isContact(uid)) addContact(uid);
+  openChat(uid);
+}
+
+function hideSuggestions() {
+  const b = document.getElementById('sinp-suggestions');
+  if (b) { b.style.display = 'none'; b.innerHTML = ''; }
+}
+
+// Hide suggestions when clicking outside
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('sinp-suggestions');
+  const input = document.getElementById('sinp');
+  if (!box || !input) return;
+  if (e.target === input || input.contains(e.target) || box.contains(e.target)) return;
+  hideSuggestions();
+});
+
+// ── USERNAME CHECKS ──
+let _usrCheckTimer = null;
+function onUsernameInput() {
+  const msg = document.getElementById('pusr-msg'); if (msg) { msg.style.display='none'; }
+  clearTimeout(_usrCheckTimer);
+  _usrCheckTimer = setTimeout(async () => {
+    const v = (gv('pusr')||'').trim();
+    if (!v) return;
+    const ok = await checkUsernameAvailable(v);
+    const msg = document.getElementById('pusr-msg');
+    if (!msg) return;
+    if (ok) {
+      msg.style.display = 'block'; msg.style.color = 'var(--t2)'; msg.textContent = 'Ник доступен';
+    } else {
+      msg.style.display = 'block'; msg.style.color = 'var(--red)'; msg.textContent = 'Ник уже занят';
+    }
+  }, 550);
+}
+
+async function checkUsernameAvailable(username) {
+  if (!username) return false;
+  try {
+    const q = await db.collection('users').where('username', '==', username).get();
+    if (q.empty) return true;
+    // If found only the current user, consider available
+    if (q.size === 1) {
+      const doc = q.docs[0];
+      if (doc.id === auth.currentUser.uid) return true;
+    }
+    return false;
+  } catch (e) {
+    console.error('[DEBUG] Username check failed', e);
+    if (e && e.code === 'permission-denied') {
+      showNotif('Ошибка: проверка ника запрещена правилами Firestore (permission-denied)');
+    }
+    return false;
+  }
+}
+
+// ── ACCOUNT DELETION ──
+  function confirmDeleteAccount() {
+    if (!auth.currentUser) { showNotif('Неавторизован'); return; }
+    if (!confirm('Вы действительно хотите удалить аккаунт? Это действие необратимо.')) return;
+    deleteAccount();
+  }
+
+  async function deleteAccount() {
+    if (!auth.currentUser) { showNotif('Неавторизован'); return; }
+    const uid = auth.currentUser.uid;
+    try {
+      // Stop presence first
+      stopPresenceHeartbeat();
+      try { await db.collection('users').doc(uid).delete(); } catch (e) { console.warn('User doc delete failed', e); }
+      await auth.currentUser.delete();
+      localStorage.removeItem('hate_user');
+      showNotif('Аккаунт удалён');
+      setTimeout(() => location.reload(), 900);
+    } catch (e) {
+      console.error('Delete account failed', e);
+      if (e && e.code === 'auth/requires-recent-login') {
+        showNotif('Для удаления аккаунта требуется повторная авторизация. Войдите заново и попробуйте снова.');
+      } else {
+        showNotif('Ошибка удаления аккаунта: ' + (e.message || e.code || ''));
+      }
+    }
+  }
+
+// ── OPEN CHAT ──
+function openChat(uid) {
+  activeChat = uid;
+  if (chats[uid]) chats[uid].unread = 0;
+  
+  renderCL();
+  updTB();
+  setupMessagesListener(uid);
+  
+  document.getElementById('empty').style.display = 'none';
+  const cv = document.getElementById('chatview');
+  cv.style.display = 'flex';
+  cv.style.flexDirection = 'column';
+  cv.style.flex = '1';
+  cv.style.overflow = 'hidden';
+  document.getElementById('msginp').focus();
+  
+  // Mobile: show message view
+  if (window.innerWidth <= 768) {
+    document.getElementById('app').classList.add('msgview');
+  }
+}
+
+function updTB() {
+  if (!activeChat) return;
+  
+  const u = gu(activeChat);
+  const av = document.getElementById('tbav');
+  av.style.background = u.color || CLR[0];
+  av.textContent = ini(u.name);
+  
+  document.getElementById('tbname').textContent = u.name;
+  const st = document.getElementById('tbst');
+  st.textContent = u.online ? 'в сети' : 'не в сети';
+  st.className = 'tbst' + (u.online ? ' on' : '');
+  
+  document.getElementById('encbtn').style.color = enc.has(activeChat) ? 'var(--t1)' : 'var(--t3)';
+  updInfo();
+}
+
+// ── MSGS ──
+function renderMsgs() {
+  if (!activeChat) return;
+  
+  const msgs = (chats[activeChat] || {}).messages || [];
+  const el = document.getElementById('msgs');
+  el.innerHTML = '';
+  
+  let lastDate = '';
+  
+  msgs.forEach(msg => {
+    const msgDate = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleDateString('ru', { day: 'numeric', month: 'long' }) : '';
+    if (msgDate && msgDate !== lastDate) {
+      const dd = document.createElement('div');
+      dd.className = 'ddiv';
+      dd.textContent = msgDate;
+      el.appendChild(dd);
+      lastDate = msgDate;
+    }
+    
+    el.appendChild(mkBub(msg));
+  });
+  
+  if ((chats[activeChat] || {}).typing) {
+    const r = document.createElement('div');
+    r.className = 'mrow in';
+    r.innerHTML = '<div class="mwrap"><div class="bub in typbub"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>';
+    el.appendChild(r);
+  }
+  
+  el.scrollTop = el.scrollHeight;
+}
+
+function mkBub(msg) {
+  const isMe = msg.from === me?.id;
+  const row = document.createElement('div');
+  row.className = 'mrow ' + (isMe ? 'out' : 'in');
+  row.dataset.id = msg.id;
+  
+  let rh = '';
+  if (msg.replyTo) {
+    rh = `<div class="brp"><div class="bra">${esc(msg.replyTo.from_name || msg.replyTo.from)}</div><div class="brt">${esc(msg.replyTo.text || '📎')}</div></div>`;
+  }
+  
+  let fh = msg.forwarded ? '<div class="fwd">↩ Переслано</div>' : '';
+  
+  let fih = '';
+  if (msg.file) {
+    if (msg.file.isImage) {
+      fih = `<img src="${msg.file.url}" style="max-width:250px;max-height:270px;border-radius:9px;display:block;margin-bottom:4px;object-fit:cover"/>`;
+    } else {
+      fih = `<div class="fatt"><div class="ficn">📎</div><div><div class="fnm">${esc(msg.file.name)}</div><div class="fsz">${(msg.file.size / 1024).toFixed(1)} KB</div></div></div>`;
+    }
+  }
+  
+  const rch = msg.reactions?.length ? 
+    `<div class="rcs">${msg.reactions.map(r => `<span class="rc" onclick="addRct('${msg.id}','${r.emoji}')">${r.emoji} ${r.count}</span>`).join('')}</div>` : '';
+  
+  row.innerHTML = `
+    <div class="mwrap">
+      <div class="macts">
+        <button class="mab" onclick="opnEmoji('${msg.id}',event)">😊</button>
+        <button class="mab" onclick="setRply('${msg.id}')">↩</button>
+        <button class="mab" onclick="opnCtx(event,'${msg.id}')">•••</button>
+      </div>
+      <div id="ep${msg.id}" class="epick" style="display:none"></div>
+      ${msg.anonymous ? `<div style="font-size:12px;color:var(--t3);margin-bottom:6px">${esc(msg.anonymousName||'Аноним')}</div>` : ''}
+      ${rh}
+      <div class="bub ${isMe ? 'out' : 'in'}" oncontextmenu="opnCtx(event,'${msg.id}');return false">
+        ${fh}${fih}<span>${esc(msg.text || '')}</span>${rch}
+        <div class="mmeta">
+          ${msg.encrypted ? '<span class="menc">🔒</span>' : ''}
+          ${msg.edited ? '<span class="medit">изм.</span>' : ''}
+          <span class="mtime">${msg.timestamp ? formatTime(msg.timestamp) : ''}</span>
+          ${isMe ? `<span class="mtick ${msg.read ? 'rd' : ''}">${msg.read ? '✓✓' : '✓'}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+
+  // Add enter animation for local/just-sent messages
+  const bubble = row.querySelector('.bub');
+  if (bubble && (String(msg.id || '').startsWith('local-') || msg._local)) {
+    bubble.classList.add('enter');
+    setTimeout(() => { try { bubble.classList.remove('enter'); } catch(e){} }, 420);
+  }
+
+  return row;
+}
+
+// ── SEND ──
+async function sendMsg() {
+  const inp = document.getElementById('msginp');
+  const text = inp.value.trim();
+  
+  if (!text || !activeChat || !auth.currentUser) return;
+
+  const anon = !!window.sendAnon;
+  
+  if (editObj) {
+    // Edit message
+    await window.db.collection('messages').doc(editObj.id).update({
+      text: text,
+      edited: true,
+      editedAt: new Date()
+    });
+    clrEdit();
+    inp.value = '';
+    autoRz(inp);
+    return;
+  }
+  
+  // Send new message
+  const userId = window.auth.currentUser.uid;
+  const chatRoom = [userId, activeChat].sort().join('_');
+  
+  const msg = {
+    from: userId,
+    to: activeChat,
+    room: chatRoom,
+    text: text,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    encrypted: enc.has(activeChat),
+    read: false
+  };
+
+  if (anon) {
+    // Obfuscated sender info for anonymous messages
+    msg.anonymous = true;
+    msg.anonymousName = genAnonName();
+    // Use a generic from value so UI can display anonName; do not store real UID here
+    msg.from = 'anonymous';
+  }
+  
+  if (reply) {
+    msg.replyTo = {
+      id: reply.id,
+      text: reply.text,
+      from: reply.from,
+      from_name: reply.from === me?.id ? 'Вы' : gu(reply.from).name
+    };
+  }
+
+  // Optimistic local render to show message immediately with animation
+  try {
+    const localMsg = Object.assign({}, msg);
+    localMsg.id = 'local-' + Date.now();
+    localMsg._local = true;
+    localMsg.timestamp = { seconds: Math.floor(Date.now() / 1000) };
+    if (!chats[activeChat]) chats[activeChat] = { messages: [], unread: 0 };
+    chats[activeChat].messages.push(localMsg);
+    renderMsgs();
+    saveChatsLocal();
+  } catch (e) { console.warn('Local render failed', e); }
+
+  try {
+    await db.collection('messages').add(msg);
+    // After successful send, reload messages listener will fetch and save. Still save locally as backup
+    saveChatsLocal();
+  } catch (e) {
+    console.error('Failed to send message', e);
+    showNotif('Ошибка отправки сообщения');
+  }
+
+  inp.value = '';
+  autoRz(inp);
+  clrReply();
+  try { inp.focus(); } catch (e) {}
+}
+
+// ── REPLY/EDIT ──
+function setRply(id) {
+  const m = findMsg(id);
+  if (!m) return;
+  
+  reply = m;
+  document.getElementById('rplybar').classList.remove('off');
+  document.getElementById('rplywho').textContent = m.from === me?.id ? 'Вы' : gu(m.from).name;
+  document.getElementById('rplytxt').textContent = m.text || '📎';
+  document.getElementById('msginp').focus();
+}
+
+function clrReply() {
+  reply = null;
+  document.getElementById('rplybar').classList.add('off');
+}
+
+function clrEdit() {
+  editObj = null;
+  document.getElementById('editbar').classList.add('off');
+  document.getElementById('msginp').value = '';
+  autoRz(document.getElementById('msginp'));
+}
+
+// ── CTX ──
+function opnCtx(e, id) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  ctxObj = findMsg(id);
+  if (!ctxObj) return;
+  
+  document.getElementById('cxedit').className = 'cxi' + (ctxObj.from !== me?.id ? ' dim' : '');
+  
+  const m = document.getElementById('ctx');
+  m.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+  m.style.top = Math.min(e.clientY, window.innerHeight - 230) + 'px';
+  m.classList.add('op');
+}
+
+async function cxDo(action) {
+  document.getElementById('ctx').classList.remove('op');
+  if (!ctxObj) return;
+  
+  if (action === 'reply') {
+    setRply(ctxObj.id);
+  } else if (action === 'edit') {
+    if (ctxObj.from !== me?.id) return;
+    editObj = ctxObj;
+    document.getElementById('editbar').classList.remove('off');
+    document.getElementById('edittxt').textContent = ctxObj.text;
+    const inp = document.getElementById('msginp');
+    inp.value = ctxObj.text;
+    inp.focus();
+    autoRz(inp);
+  } else if (action === 'copy') {
+    navigator.clipboard.writeText(ctxObj.text || '');
+    showNotif('Скопировано');
+  } else if (action === 'forward') {
+    opnFwd(ctxObj);
+  } else if (action === 'pin') {
+    showNotif('📌 Закреплено');
+  } else if (action === 'del') {
+    await window.db.collection('messages').doc(ctxObj.id).delete();
+    showNotif('Удалено');
+  }
+}
+
+// ── REACTIONS ──
+function opnEmoji(id, e) {
+  e.stopPropagation();
+  document.querySelectorAll('.epick').forEach(x => x.style.display = 'none');
+  
+  const ep = document.getElementById('ep' + id);
+  if (!ep) return;
+  
+  ep.innerHTML = EMOJIS.map(em => 
+    `<button class="emb" onclick="addRct('${id}','${em}');this.closest('.epick').style.display='none'">${em}</button>`
+  ).join('');
+  
+  ep.style.display = 'flex';
+}
+
+async function addRct(id, emoji) {
+  const msg = findMsg(id);
+  if (!msg) return;
+  
+  if (!msg.reactions) msg.reactions = [];
+  
+  const existing = msg.reactions.find(r => r.emoji === emoji);
+  if (existing) {
+    existing.count++;
+  } else {
+    msg.reactions.push({ emoji, count: 1 });
+  }
+  
+  await db.collection('messages').doc(id).update({
+    reactions: msg.reactions
+  });
+  
+  renderMsgs();
+}
+
+// ── TYPING ──
+function onTyp() {
+  if (!activeChat || !window.auth.currentUser) return;
+  if (typingThrottle[activeChat]) return;
+  
+  typingThrottle[activeChat] = true;
+  // Update typing status in Firestore (so other users can see it)
+  if (!chats[activeChat]) chats[activeChat] = { messages: [], unread: 0 };
+  chats[activeChat].typing = true;
+
+  const uid = auth.currentUser.uid;
+  try {
+    // Write typing target for this user (merge to avoid overwriting)
+    db.collection('users').doc(uid).set({ typingTo: activeChat, typingAt: new Date() }, { merge: true }).catch(err => {
+      console.warn('Typing write failed', err);
+      if (err && err.code === 'permission-denied') showNotif('Ошибка: отправка статуса печати запрещена правилами Firestore');
+    });
+  } catch (e) {
+    console.warn('Typing set error', e);
+  }
+
+  // Reset typing indicator after timeout and clear Firestore flag
+  clearTimeout(typingTimeouts[activeChat]);
+  typingTimeouts[activeChat] = setTimeout(() => {
+    typingThrottle[activeChat] = false;
+    if (chats[activeChat]) chats[activeChat].typing = false;
+    // Clear typingTo in Firestore if still set
+    try {
+      db.collection('users').doc(uid).set({ typingTo: null }, { merge: true }).catch(()=>{});
+    } catch(e){}
+    if (activeChat) renderMsgs();
+  }, 1800);
+}
+
+// ── FILE UPLOAD HANDLERS ──
+function trigF(accept) {
+  const fi = document.getElementById('fileinp');
+  if (!fi) return;
+  fi.accept = accept || '*/*';
+  fi.click();
+  clsAt();
+}
+
+// Anonymous send toggle and helper
+window.sendAnon = false;
+function toggleAnon() {
+  window.sendAnon = !window.sendAnon;
+  const b = document.getElementById('anonBtn');
+  if (b) {
+    b.style.background = window.sendAnon ? 'var(--s3)' : 'none';
+    b.style.color = window.sendAnon ? 'var(--t1)' : 'var(--t3)';
+  }
+  showNotif(window.sendAnon ? 'Анонимная отправка вкл' : 'Анонимная отправка выкл');
+}
+
+function genAnonName() {
+  const short = auth && auth.currentUser ? auth.currentUser.uid.slice(-4) : Math.random().toString(36).slice(2,6);
+  const base = me && me.name ? (me.name.split(' ')[0]) : 'Anon';
+  return `${base} · ${short}`;
+}
+
+async function handleFile() {
+  const fi = document.getElementById('fileinp');
+  if (!fi || !fi.files || !fi.files[0]) return;
+  const file = fi.files[0];
+  if (!activeChat || !auth.currentUser) { showNotif('Выберите чат для отправки'); fi.value = ''; return; }
+
+  const userId = auth.currentUser.uid;
+  const path = `uploads/${userId}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+  const ref = storage.ref().child(path);
+
+  try {
+    const snap = await ref.put(file);
+    const url = await snap.ref.getDownloadURL();
+    const isImage = (file.type || '').startsWith('image/');
+
+    const msg = {
+      from: userId,
+      to: activeChat,
+      room: [userId, activeChat].sort().join('_'),
+      text: '',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      encrypted: enc.has(activeChat),
+      read: false,
+      file: {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: url,
+        isImage: isImage
+      }
+    };
+
+    await db.collection('messages').add(msg);
+    showNotif(isImage ? '📷 Фото отправлено' : '📎 Файл отправлен');
+    fi.value = '';
+  } catch (error) {
+    showNotif('Ошибка загрузки файла');
+    console.error(error);
+    fi.value = '';
+  }
+}
+
+function fkVoice() {
+  showNotif('🎤 Запись... (демо)');
+  clsAt();
+}
+
+// ── FORWARD ──
+function opnFwd(msg) {
+  fwdMsg = msg;
+  
+  const l = document.getElementById('fwdlist');
+  l.innerHTML = users.map(u => 
+    `<div class="ci" style="border-radius:9px;margin-bottom:3px;animation:none" onclick="doFwd('${u.id}')">
+       <div class="av av36" style="background:${u.color || CLR[0]}">${ini(u.name)}</div>
+       <span style="font-size:13.5px;color:var(--t2)">${esc(u.name)}</span>
+     </div>`
+  ).join('');
+  
+  document.getElementById('fwddlg').classList.remove('off');
+}
+
+async function doFwd(to) {
+  if (!fwdMsg || !auth.currentUser) return;
+  
+  clsFwd();
+  
+  const userId = window.auth.currentUser.uid;
+  const chatRoom = [userId, to].sort().join('_');
+  
+  const msg = {
+    from: userId,
+    to: to,
+    room: chatRoom,
+    text: fwdMsg.text,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    forwarded: true,
+    encrypted: enc.has(to),
+    read: false
+  };
+  
+  if (fwdMsg.file) {
+    msg.file = fwdMsg.file;
+  }
+  
+  await window.db.collection('messages').add(msg);
+  showNotif(`Переслано → ${gu(to).name}`);
+}
+
+function clsFwd() {
+  document.getElementById('fwddlg').classList.add('off');
+  fwdMsg = null;
+}
+
+// ── INFO PANEL ──
+function tglInfo() {
+  infoOpen = !infoOpen;
+  document.getElementById('rpanel').classList.toggle('off', !infoOpen);
+  // mark app so CSS can show rpanel only when explicitly opened
+  document.getElementById('app').classList.toggle('info-open', infoOpen);
+  updInfo();
+}
+
+function updInfo() {
+  if (!activeChat || !infoOpen) return;
+  
+  const u = gu(activeChat);
+  const av = document.getElementById('rpav');
+  av.style.background = u.color || CLR[0];
+  av.textContent = ini(u.name);
+  
+  document.getElementById('rpnm').textContent = u.name;
+  document.getElementById('rpsub').textContent = u.username || ('@' + u.name.toLowerCase().replace(/\s+/g, ''));
+  
+  const b = document.getElementById('rpbdg');
+  b.textContent = u.online ? '● в сети' : 'не в сети';
+  b.className = 'rpbdg' + (u.online ? ' on' : '');
+  
+  document.getElementById('rpenc').textContent = enc.has(activeChat) ? 'E2E Вкл' : 'Выкл';
+  
+  const imgs = (chats[activeChat]?.messages || []).filter(m => m.file?.isImage);
+  document.getElementById('rpmedia').innerHTML = imgs.length ? 
+    imgs.slice(-6).map(m => 
+      `<img src="${m.file.url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;cursor:pointer"/>`
+    ).join('') : 
+    '<span style="color:var(--t4);font-size:12.5px">Нет медиа</span>';
+  
+  document.getElementById('rp-enc-note').innerHTML = enc.has(activeChat) ? 
+    '🔒 <strong style="color:var(--t2)">End-to-end шифрование</strong> включено.<br>AES-256-GCM + ECDH P-256' : 
+    'Стандартное шифрование при передаче.';
+}
+
+function clearHist() {
+  if (!activeChat) return;
+  // Would need to delete all messages in the chat
+  showNotif('Очистка истории (демо)');
+}
+
+// ── ENCRYPTION ──
+function tglEnc() {
+  if (!activeChat) return;
+  enc.has(activeChat) ? enc.delete(activeChat) : enc.add(activeChat);
+  showNotif(enc.has(activeChat) ? '🔒 E2E включён' : 'Шифрование отключено');
+  updTB();
+  renderCL();
+}
+
+// ── PANELS ──
+function openP(name) {
+  ['settings', 'profile', 'privacy'].forEach(x => 
+    document.getElementById('panel-' + x).classList.add('off')
+  );
+  document.getElementById('panel-' + name).classList.remove('off');
+  if (name === 'profile') fillProf();
+}
+
+function closeP(name) {
+  document.getElementById('panel-' + name).classList.add('off');
+}
+
+function fillProf() {
+  if (!me) return;
+  
+  const av = document.getElementById('profav');
+  if (av) {
+    av.style.background = me.color || CLR[0];
+    av.textContent = ini(me.name);
+  }
+  
+  sv('pname', me.name || '');
+  sv('pusr', me.username || '');
+  sv('pbio', me.bio || '');
+  sv('pemail', me.email || '');
+}
+
+async function saveProf() {
+  if (!me || !auth.currentUser) return;
+  
+  me.name = gv('pname') || me.name;
+  const newUsername = (gv('pusr') || '').trim();
+  me.bio = gv('pbio');
+
+  // If username changed, ensure availability
+  if (newUsername && newUsername !== (me.username || '')) {
+    const ok = await checkUsernameAvailable(newUsername);
+    if (!ok) {
+      const msg = document.getElementById('pusr-msg');
+      if (msg) { msg.style.display = 'block'; msg.textContent = 'Этот ник уже занят'; }
+      showNotif('Никнейм уже занят');
+      return;
+    }
+    me.username = newUsername;
+  } else {
+    me.username = me.username || newUsername;
+  }
+  
+  localStorage.setItem('hate_user', JSON.stringify(me));
+  
+  // Update in Firestore (use set with merge to avoid "No document to update" errors)
+  try {
+    await db.collection('users').doc(auth.currentUser.uid).set({
+      name: me.name,
+      username: me.username,
+      bio: me.bio,
+      lastUpdate: new Date()
+    }, { merge: true });
+  } catch (e) {
+    console.error('Failed to save profile', e);
+    showNotif('Ошибка сохранения профиля');
+  }
+  
+  fillProf();
+  showNotif('✓ Профиль сохранён');
+}
+
+// ── THEME ──
+function setTheme(t) {
+  currentTheme = t;
+  const r = document.documentElement;
+  
+  if (t === 'light') {
+    r.style.setProperty('--bg', '#f2f2f2');
+    r.style.setProperty('--s1', '#e8e8e8');
+    r.style.setProperty('--s2', '#dcdcdc');
+    r.style.setProperty('--s3', '#d0d0d0');
+    r.style.setProperty('--s4', '#b8b8b8');
+    r.style.setProperty('--t1', '#111');
+    r.style.setProperty('--t2', '#333');
+    r.style.setProperty('--t3', '#666');
+    r.style.setProperty('--t4', '#888');
+    r.style.setProperty('--bd', 'rgba(0,0,0,.07)');
+    r.style.setProperty('--bd2', 'rgba(0,0,0,.12)');
+    r.style.setProperty('--out', '#e0e0e0');
+    r.style.setProperty('--in', '#d4d4d4');
+  } else {
+    r.style.setProperty('--bg', '#0a0a0a');
+    r.style.setProperty('--s1', '#111');
+    r.style.setProperty('--s2', '#181818');
+    r.style.setProperty('--s3', '#222');
+    r.style.setProperty('--s4', '#333');
+    r.style.setProperty('--t1', '#f0f0f0');
+    r.style.setProperty('--t2', '#aaa');
+    r.style.setProperty('--t3', '#666');
+    r.style.setProperty('--t4', '#444');
+    r.style.setProperty('--bd', 'rgba(255,255,255,.07)');
+    r.style.setProperty('--bd2', 'rgba(255,255,255,.11)');
+    r.style.setProperty('--out', '#1a1a1a');
+    r.style.setProperty('--in', '#131313');
+  }
+  
+  document.getElementById('tdark').style.background = t === 'dark' ? 'var(--s3)' : 'none';
+  document.getElementById('tdark').style.color = t === 'dark' ? 'var(--t1)' : 'var(--t4)';
+  document.getElementById('tlight').style.background = t === 'light' ? 'var(--s3)' : 'none';
+  document.getElementById('tlight').style.color = t === 'light' ? 'var(--t1)' : 'var(--t4)';
+  
+  localStorage.setItem('hate_theme', t);
+}
+
+function cycleTheme() {
+  setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+}
+
+function applyTheme() {
+  setTheme(localStorage.getItem('hate_theme') || 'dark');
+}
+
+// ── SIDEBAR ──
+let sbOpen = true;
+function tglSb() {
+  if (window.innerWidth <= 768) {
+    // На мобилке - закрыть чат и вернуться к списку
+    if (activeChat) {
+      document.getElementById('app').classList.remove('msgview');
+      activeChat = null;
+      document.getElementById('chatview').style.display = 'none';
+      document.getElementById('empty').style.display = 'flex';
+      document.getElementById('rpanel').classList.add('off');
+    }
+  } else {
+    // На десктопе - переключить sidebar
+    sbOpen = !sbOpen;
+    document.getElementById('sidebar').classList.toggle('off', !sbOpen);
+  }
+}
+
+// ── ATTACH ──
+function tglAt(e) {
+  e.stopPropagation();
+  document.getElementById('atmenu').classList.toggle('op');
+}
+
+function clsAt() {
+  document.getElementById('atmenu').classList.remove('op');
+}
+
+// ── NOTIF ──
+let nt = null;
+function showNotif(msg) {
+  const e = document.getElementById('notif');
+  e.textContent = msg;
+  e.classList.add('sh');
+  clearTimeout(nt);
+  nt = setTimeout(() => e.classList.remove('sh'), 2600);
+}
+
+// ── HELPERS ──
+function gu(id) {
+  return users.find(u => u.id === id) || { name: id, color: CLR[0], id };
+}
+
+function findMsg(id) {
+  if (!activeChat || !chats[activeChat]) return null;
+  return chats[activeChat].messages.find(m => m.id == id);
+}
+
+function ini(name) {
+  if (!name) return '?';
+  const p = name.trim().split(/\s+/);
+  return p.length > 1 ? (p[0][0] + p[1][0]).toUpperCase() : name[0].toUpperCase();
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function gv(id) {
+  return (document.getElementById(id)?.value || '').trim();
+}
+
+function sv(id, val) {
+  const e = document.getElementById(id);
+  if (e) e.value = val;
+}
+
+function formatTime(timestamp) {
+  if (!timestamp) return '';
+  const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+  return date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0');
+}
+
+function autoRz(ta) {
+  if (!ta) return;
+  ta.style.height = 'auto';
+  const h = Math.min(ta.scrollHeight || 0, 120);
+  ta.style.height = Math.max(h, 28) + 'px';
+}
+
+function loadUsers() {
+  // Users are loaded via onSnapshot in setupChatsListener
+}
+
+// ── GLOBAL ──
+document.addEventListener('click', () => {
+  document.getElementById('ctx').classList.remove('op');
+  document.querySelectorAll('.epick').forEach(e => e.style.display = 'none');
+  clsAt();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    clrReply();
+    clrEdit();
+    clsFwd();
+    ['settings', 'profile', 'privacy'].forEach(n => closeP(n));
+  }
+});
+
+// ── AUTH STATE ──
+window.addEventListener('load', () => {
+  if (!window.auth) {
+    console.warn('Firebase Auth not loaded yet');
+    setTimeout(() => window.dispatchEvent(new Event('load')), 500);
+    return;
+  }
+  let _authHideTimer = null;
+  window.auth.onAuthStateChanged((user) => {
+    if (_authHideTimer) { clearTimeout(_authHideTimer); _authHideTimer = null; }
+
+    if (user) {
+      // Load user data from Firestore
+      window.db.collection('users').doc(user.uid).get().then((docSnap) => {
+        if (docSnap.exists) {
+          const userData = docSnap.data();
+          afterAuth({ ...user, ...userData });
+        } else {
+          afterAuth(user);
+        }
+      }).catch(() => {
+        afterAuth(user);
+      });
+      } else {
+        // If there's a saved token or profile locally, keep UI visible for now to avoid flicker
+        const hasToken = !!localStorage.getItem('firebase_token');
+        const hasSaved = !!localStorage.getItem('hate_user');
+        if (hasToken || hasSaved) {
+          // keep app visible and load local user for UI continuity
+          document.getElementById('auth').classList.add('off');
+          document.getElementById('app').style.display = 'flex';
+          if (hasSaved && !me) {
+            try { me = JSON.parse(localStorage.getItem('hate_user')); fillProf(); } catch(e){}
+          }
+          return;
+        }
+
+        // Delay hiding UI slightly to avoid flicker on mobile when auth state briefly toggles
+        _authHideTimer = setTimeout(() => {
+          document.getElementById('auth').classList.remove('off');
+          document.getElementById('app').style.display = 'none';
+
+          // Load saved local profile for convenience (UI only)
+          const savedUser = localStorage.getItem('hate_user');
+          if (savedUser) {
+            try { me = JSON.parse(savedUser); } catch (e) {}
+          }
+        }, 700);
+      }
+  });
+});
+
+// (no extra rpanel handlers)
+</script>
+<script>
+// Attach robust handlers to the right-panel header to ensure taps register on mobile
+setTimeout(() => {
+  const hdr = document.getElementById('rphdr');
+  if (!hdr) return;
+  const handler = (e) => {
+    e && e.stopPropagation && e.stopPropagation();
+    if (e && e.preventDefault) e.preventDefault();
+    try { tglInfo(); } catch (err) { console.warn('tglInfo error', err); }
+  };
+  hdr.style.touchAction = 'manipulation';
+  hdr.addEventListener('touchend', handler, { passive: false });
+  hdr.addEventListener('click', handler);
+  hdr.style.zIndex = 1200;
+}, 120);
+</script>
+<script>
+// Fallback: if taps on Chrome/Android don't reach header, detect touchend positions
+// inside header rect and close panel. Only fires when panel is open.
+;(function(){
+  let _lastHdrTap = 0;
+  function inHdr(touch) {
+    const hdr = document.getElementById('rphdr');
+    if (!hdr) return false;
+    const r = hdr.getBoundingClientRect();
+    return touch.clientX >= r.left && touch.clientX <= r.right && touch.clientY >= r.top && touch.clientY <= r.bottom;
+  }
+  document.addEventListener('touchend', function(ev){
+    try {
+      if (!infoOpen) return;
+      const t = ev.changedTouches && ev.changedTouches[0];
+      if (!t) return;
+      if (!inHdr(t)) return;
+      const now = Date.now();
+      if (now - _lastHdrTap < 350) return;
+      _lastHdrTap = now;
+      tglInfo();
+    } catch (e){ console.warn('hdr touchend fallback err', e); }
+  }, { passive: true });
+
+  document.addEventListener('click', function(ev){
+    try {
+      if (!infoOpen) return;
+      const pt = { clientX: ev.clientX, clientY: ev.clientY };
+      if (!inHdr(pt)) return;
+      const now = Date.now();
+      if (now - _lastHdrTap < 350) return;
+      _lastHdrTap = now;
+      tglInfo();
+    } catch (e){ console.warn('hdr click fallback err', e); }
+  }, true);
+})();
+</script>
+<script>
+// Strong fallback using elementFromPoint to detect top element under the tap
+(function(){
+  function flash(el){
+    try{
+      el.style.outline = '2px solid rgba(255,0,0,.9)';
+      setTimeout(()=>{ el.style.outline = ''; }, 400);
+    }catch(e){}
+  }
+
+  document.addEventListener('touchend', function(ev){
+    try{
+      if (!infoOpen) return;
+      const t = ev.changedTouches && ev.changedTouches[0]; if(!t) return;
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      if (!el) return;
+      const hdr = el.closest && el.closest('.rphdr');
+      if (hdr) { flash(hdr); tglInfo(); ev.preventDefault(); ev.stopPropagation(); }
+    }catch(e){ console.warn('elementFromPoint touchend err', e); }
+  }, true);
+
+  document.addEventListener('click', function(ev){
+    try{
+      if (!infoOpen) return;
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      if (!el) return;
+      const hdr = el.closest && el.closest('.rphdr');
+      if (hdr) { flash(hdr); tglInfo(); ev.preventDefault(); ev.stopPropagation(); }
+    }catch(e){ console.warn('elementFromPoint click err', e); }
+  }, true);
+})();
+</script>
+</script>
+<script>
+  // helper to set preferred view cookie and redirect
+  function setPreferredView(v){
+    try{
+      document.cookie = 'prefer_view=' + encodeURIComponent(v) + ';path=/;max-age=' + (30*24*60*60) + ';SameSite=Lax';
+      if(v === 'mobile') window.location.href = '../mobile-version/'; else window.location.href = '../pc-version/';
+    }catch(e){ console.warn('setPreferredView error', e); }
+  }
+</script>
+</body>
+</html>
