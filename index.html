@@ -92,6 +92,14 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .blbl.e{color:var(--acc)}
 .btxt{font-size:12px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* ── TOPBAR / CHAT HEADER ── */
+#topbar{height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;border-bottom:1px solid var(--bd);flex-shrink:0;background:var(--s1)}
+.tbuser{display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;min-width:0}
+.tbuser .av{flex-shrink:0}
+.tbname{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbst{font-size:12px;color:var(--t3);line-height:1}
+.tbacts{display:flex;align-items:center;gap:8px}
+
 /* ── INPUT ── */
 #inpwrap{padding:9px 14px 13px;background:var(--bg);border-top:1px solid var(--bd);flex-shrink:0}
 #inprow{display:flex;align-items:flex-end;gap:8px;background:var(--s1);border:1px solid var(--bd2);border-radius:15px;padding:5px 5px 5px 11px;transition:border-color .2s}
