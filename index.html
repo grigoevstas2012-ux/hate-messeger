@@ -135,7 +135,8 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 
 
 /* ── RIGHT PANEL ── */
-.rphdr{height:58px;display:flex;align-items:center;padding:0 14px;gap:11px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.rphdr{height:58px;display:flex;align-items:center;padding:0 14px;gap:11px;border-bottom:1px solid var(--bd);flex-shrink:0;position:relative}
+.rphdr-close-area{position:absolute;left:0;top:0;right:0;bottom:0;background:transparent;border:none;cursor:pointer}
 .rphdr{cursor:pointer}
 .rptit{font-size:15px;font-weight:700}
 .rpavwp{padding:26px 0 18px;display:flex;flex-direction:column;align-items:center;gap:9px;border-bottom:1px solid var(--bd)}
@@ -419,6 +420,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
     <div id="rphdr" class="rphdr">
       <button class="ib"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
       <div class="rptit">Информация</div>
+      <button class="rphdr-close-area" onclick="tglInfo()" aria-label="close"></button>
     </div>
     <div class="rpavwp">
       <div class="av av72" id="rpav"></div>
@@ -628,6 +630,25 @@ const CLR = ['#d0d0d0','#b8b8b8','#a0a0a0','#888','#707070','#c8b9a0','#b8a88a',
 let me = null;
 let users = [];
 let chats = {};
+// contacts stored locally as array of user ids; users must be added via @ search
+function getContacts() {
+  try { return JSON.parse(localStorage.getItem('hate_contacts') || '[]') || []; } catch (e) { return []; }
+}
+function saveContacts(arr) { localStorage.setItem('hate_contacts', JSON.stringify(arr || [])); }
+function isContact(id) { return getContacts().indexOf(id) !== -1; }
+function addContact(id) {
+  if (!id) return;
+  const c = getContacts();
+  if (c.indexOf(id) === -1) {
+    c.push(id);
+    saveContacts(c);
+    // ensure chat entry exists
+    if (!chats[id]) chats[id] = { messages: [], unread: 0 };
+    renderCL();
+    showNotif('Контакт добавлен');
+  }
+}
+function removeContact(id) { const c = getContacts().filter(x => x !== id); saveContacts(c); renderCL(); }
 let activeChat = null;
 let enc = new Set();
 let reply = null;
@@ -915,12 +936,17 @@ function setupChatsListener() {
     });
 
     // Reflect typing/online state into chats structure for UI
+    const contacts = getContacts();
     users.forEach(u => {
-      if (!chats[u.id]) chats[u.id] = { messages: [], unread: 0 };
-      // typing if this user is typing TO me
-      chats[u.id].typing = !!(u.typingTo && me && u.typingTo === me.id);
-      // ensure online flag exists
-      chats[u.id].online = !!u.online;
+      // only create chat entries for contacts or if there is existing message history
+      const hasHistory = !!(chats[u.id] && (chats[u.id].messages || []).length);
+      if (contacts.indexOf(u.id) !== -1 || hasHistory) {
+        if (!chats[u.id]) chats[u.id] = { messages: [], unread: 0 };
+        // typing if this user is typing TO me
+        chats[u.id].typing = !!(u.typingTo && me && u.typingTo === me.id);
+        // ensure online flag exists
+        chats[u.id].online = !!u.online;
+      }
     });
 
     renderCL();
@@ -989,12 +1015,12 @@ function renderCL() {
   const el = document.getElementById('chatlist');
   el.innerHTML = '';
   
+  // Show only contacts and chats with existing history in the main list.
+  const contacts = getContacts();
   users.filter(u => {
-    if (!q) return true;
-    const nameMatch = u.name && u.name.toLowerCase().includes(q);
-    const usernameMatch = u.username && u.username.toLowerCase().includes(q);
-    const emailMatch = u.email && u.email.toLowerCase().includes(q);
-    return nameMatch || usernameMatch || emailMatch;
+    if (!u) return false;
+    const hasHistory = !!(chats[u.id] && (chats[u.id].messages||[]).length);
+    return contacts.indexOf(u.id) !== -1 || hasHistory;
   }).forEach((u, i) => {
     const chat = chats[u.id] || { messages: [], unread: 0 };
     const last = chat.messages[chat.messages.length - 1];
@@ -1074,6 +1100,8 @@ function renderSuggestions() {
 function pickSuggestion(uid) {
   document.getElementById('sinp').value = '';
   document.getElementById('sinp-suggestions').style.display = 'none';
+  // When picking a suggestion, add user as contact (if not already) and open chat
+  if (!isContact(uid)) addContact(uid);
   openChat(uid);
 }
 
