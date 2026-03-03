@@ -510,7 +510,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
   </div>
   <div class="psbod">
     <div class="pssec" style="display:flex;flex-direction:column;align-items:center;padding:28px 22px">
-      <div class="paed" onclick="showNotif('Нажмите для загрузки фото')">
+      <div class="paed" onclick="trigAvatar()">
         <div class="av av90" id="profav" style="margin-bottom:12px"></div>
         <div class="aovl">📷</div>
       </div>
@@ -1079,8 +1079,11 @@ function renderCL() {
     d.style.animationDelay = (i * 0.04) + 's';
     d.onclick = () => openChat(u.id);
     
+    // Build avatar: prefer photoURL, otherwise color + initials
+    const avStyle = u.photoURL ? `background-image:url(${u.photoURL});background-size:cover;background-position:center` : `background:${u.color || CLR[0]}`;
+    const avContent = u.photoURL ? '' : ini(u.name) + (u.online ? '<div class="odot"></div>' : '');
     d.innerHTML = `
-      <div class="av av46" style="background:${u.color || CLR[0]}">${ini(u.name)}${u.online ? '<div class="odot"></div>' : ''}</div>
+      <div class="av av46" style="${avStyle}">${avContent}</div>
       <div class="cinf">
         <div class="crow1">
           <span class="cname">${esc(u.name)}</span>
@@ -1265,8 +1268,15 @@ function updTB() {
   
   const u = gu(activeChat);
   const av = document.getElementById('tbav');
-  av.style.background = u.color || CLR[0];
-  av.textContent = ini(u.name);
+  if (u.photoURL) {
+    av.style.backgroundImage = `url(${u.photoURL})`;
+    av.style.backgroundSize = 'cover';
+    av.style.backgroundPosition = 'center';
+    av.textContent = '';
+  } else {
+    av.style.background = u.color || CLR[0];
+    av.textContent = ini(u.name);
+  }
   
   document.getElementById('tbname').textContent = u.name;
   const st = document.getElementById('tbst');
@@ -1279,43 +1289,29 @@ function updTB() {
 
 // ── MSGS ──
 function renderMsgs() {
-  const raw = (document.getElementById('sinp')?.value || '');
-  const q = raw.toLowerCase().trim();
-  const box = document.getElementById('sinp-suggestions');
-  if (!box) return;
-  if (!q) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  const container = document.getElementById('msgs');
+  if (!container) return;
+  container.innerHTML = '';
 
-  // If user types @prefix — match username by prefix (startsWith).
-  const isAt = q.startsWith('@');
-  const core = isAt ? q.slice(1) : q;
+  if (!activeChat) {
+    // show empty placeholder when no active chat
+    return;
+  }
 
-  // Filter loaded users (we already listen to users via setupChatsListener)
-  const matches = users.filter(u => {
-    if (!u) return false;
-    const name = (u.name || '').toLowerCase();
-    const uname = (u.username || '').toLowerCase();
-    const email = (u.email || '').toLowerCase();
-    if (isAt) return uname.startsWith(core) && uname.length;
-    // Otherwise, general contains search across name/username/email
-    return (name && name.includes(core)) || (uname && uname.includes(core)) || (email && email.includes(core));
-  }).slice(0, 8);
+  const chat = chats[activeChat] || { messages: [] };
+  const msgs = chat.messages || [];
 
-  if (!matches.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  msgs.forEach(m => {
+    try {
+      container.appendChild(mkBub(m));
+    } catch (e) { console.warn('mkBub failed', e); }
+  });
 
-  box.innerHTML = matches.map(u => {
-    const initials = (u.name || '').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() || (u.username||'').slice(0,2).toUpperCase();
-    // Show username prominently when available (especially for @ searches). Do not show email.
-    const main = u.username ? ('@' + u.username) : (u.name || 'Пользователь');
-    const sub = (u.username && u.name) ? (' · ' + u.name) : '';
-    return `<div class="sugg-item" data-uid="${u.id}" style="display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:6px;cursor:pointer">
-      <div style="width:36px;height:36px;border-radius:50%;background:${u.color||CLR[0]};display:flex;align-items:center;justify-content:center;font-weight:700;color:#111">${initials}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(main)}</div>
-        <div style="font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sub)}</div>
-      </div>
-    </div>`;
-  }).join('');
-  el.scrollTop = el.scrollHeight;
+  // Scroll to bottom
+  try { container.scrollTop = container.scrollHeight; } catch (e) {}
+
+  // Update topbar and info
+  try { updTB(); } catch (e) {}
 }
 
 function mkBub(msg) {
@@ -1596,8 +1592,18 @@ function trigF(accept) {
   const fi = document.getElementById('fileinp');
   if (!fi) return;
   fi.accept = accept || '*/*';
+  fi.dataset.target = '';
   fi.click();
   clsAt();
+}
+
+// Trigger avatar upload
+function trigAvatar() {
+  const fi = document.getElementById('fileinp');
+  if (!fi) return;
+  fi.accept = 'image/*';
+  fi.dataset.target = 'avatar';
+  fi.click();
 }
 
 // Anonymous send toggle and helper
@@ -1622,9 +1628,40 @@ async function handleFile() {
   const fi = document.getElementById('fileinp');
   if (!fi || !fi.files || !fi.files[0]) return;
   const file = fi.files[0];
-  if (!activeChat || !auth.currentUser) { showNotif('Выберите чат для отправки'); fi.value = ''; return; }
+  const target = fi.dataset.target || '';
+  if (target !== 'avatar' && (!activeChat || !auth.currentUser)) { showNotif('Выберите чат для отправки'); fi.value = ''; fi.dataset.target = ''; return; }
+  if (!auth.currentUser) { showNotif('Требуется авторизация'); fi.value = ''; fi.dataset.target = ''; return; }
 
   const userId = auth.currentUser.uid;
+  // If target is 'avatar' — upload avatar and update user profile
+  if (target === 'avatar') {
+    const path = `avatars/${userId}/avatar_${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+    const ref = storage.ref().child(path);
+    try {
+      const snap = await ref.put(file);
+      const url = await snap.ref.getDownloadURL();
+      // Save to user profile in Firestore
+      await db.collection('users').doc(userId).set({ photoURL: url, avatarUpdatedAt: new Date() }, { merge: true });
+      // Update local user object
+      me = me || {};
+      me.photoURL = url;
+      localStorage.setItem('hate_user', JSON.stringify(me));
+      // Refresh UI
+      fillProf();
+      renderCL();
+      if (activeChat) updInfo();
+      showNotif('✓ Аватар загружен');
+    } catch (error) {
+      console.error('Avatar upload failed', error);
+      showNotif('Ошибка загрузки аватара');
+    } finally {
+      fi.value = '';
+      fi.dataset.target = '';
+    }
+    return;
+  }
+
+  // Otherwise, send file as message
   const path = `uploads/${userId}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
   const ref = storage.ref().child(path);
 
@@ -1652,11 +1689,11 @@ async function handleFile() {
 
     await db.collection('messages').add(msg);
     showNotif(isImage ? '📷 Фото отправлено' : '📎 Файл отправлен');
-    fi.value = '';
+    fi.value = ''; fi.dataset.target = '';
   } catch (error) {
     showNotif('Ошибка загрузки файла');
     console.error(error);
-    fi.value = '';
+    fi.value = ''; fi.dataset.target = '';
   }
 }
 
@@ -1726,8 +1763,15 @@ function updInfo() {
   
   const u = gu(activeChat);
   const av = document.getElementById('rpav');
-  av.style.background = u.color || CLR[0];
-  av.textContent = ini(u.name);
+  if (u.photoURL) {
+    av.style.backgroundImage = `url(${u.photoURL})`;
+    av.style.backgroundSize = 'cover';
+    av.style.backgroundPosition = 'center';
+    av.textContent = '';
+  } else {
+    av.style.background = u.color || CLR[0];
+    av.textContent = ini(u.name);
+  }
   
   document.getElementById('rpnm').textContent = u.name;
   document.getElementById('rpsub').textContent = u.username || ('@' + u.name.toLowerCase().replace(/\s+/g, ''));
@@ -1783,8 +1827,15 @@ function fillProf() {
   
   const av = document.getElementById('profav');
   if (av) {
-    av.style.background = me.color || CLR[0];
-    av.textContent = ini(me.name);
+    if (me.photoURL) {
+      av.style.backgroundImage = `url(${me.photoURL})`;
+      av.style.backgroundSize = 'cover';
+      av.style.backgroundPosition = 'center';
+      av.textContent = '';
+    } else {
+      av.style.background = me.color || CLR[0];
+      av.textContent = ini(me.name);
+    }
   }
   
   sv('pname', me.name || '');
