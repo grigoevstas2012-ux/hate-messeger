@@ -20,10 +20,10 @@
 html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans',system-ui,sans-serif;overflow:hidden;font-size:14px}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--s4);border-radius:3px}
 
-/* Improve iOS Safari touch scrolling for overflow containers */
+/* Улучшена прокрутка касанием в iOS Safari для контейнеров, переполненных данными
 #chatlist, #msgs, #rpanel, .psbod { -webkit-overflow-scrolling: touch; }
 
-/* ── LAYOUT ── */
+/* ──  макет ── */
 #app{display:flex;height:calc(var(--vh, 1vh) * 100)}
 #sidebar{width:310px;min-width:310px;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;transition:width .3s,min-width .3s;overflow:hidden}
 #sidebar.off{width:0;min-width:0}
@@ -31,7 +31,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 #rpanel{width:290px;min-width:290px;background:var(--s1);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow-y:auto;animation:sldR .2s ease}
 #rpanel.off{display:none}
 
-/* ── SIDEBAR ── */
+/* ── боковая панель ── */
 #sbhdr{height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;border-bottom:1px solid var(--bd);flex-shrink:0}
 .logo{font-size:21px;font-weight:800;letter-spacing:-1.5px;flex:1;color:var(--t1)}
 .logo em{font-style:normal;font-weight:300;color:var(--t3)}
@@ -95,7 +95,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .blbl.e{color:var(--acc)}
 .btxt{font-size:12px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* ── TOPBAR / CHAT HEADER ── */
+/* ── ВЕРХНЯЯ ПАНЕЛЬ / ЗАГОЛОВОК ЧАТА */
 #topbar{height:58px;display:flex;align-items:center;padding:0 14px;gap:10px;border-bottom:1px solid var(--bd);flex-shrink:0;background:var(--s1)}
 .tbuser{display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;min-width:0}
 .tbuser .av{flex-shrink:0}
@@ -103,7 +103,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .tbst{font-size:12px;color:var(--t3);line-height:1}
 .tbacts{display:flex;align-items:center;gap:8px}
 
-/* ── INPUT ── */
+/* ── вход ── */
 #inpwrap{padding:9px 14px 13px;background:var(--bg);border-top:1px solid var(--bd);flex-shrink:0}
 #inprow{display:flex;align-items:flex-end;gap:8px;background:var(--s1);border:1px solid var(--bd2);border-radius:15px;padding:5px 5px 5px 11px;transition:border-color .2s}
 #inprow:focus-within{border-color:var(--s4)}
@@ -120,12 +120,12 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .api{padding:9px 15px;cursor:pointer;font-size:13.5px;color:var(--t2);display:flex;align-items:center;gap:9px;transition:background .1s}
 .api:hover{background:var(--s3);color:var(--t1)}
 
-/* ── ICON BUTTON ── */
+/* ── КНОПКА-ЗНАЧОК ── */
 .ib{width:34px;height:34px;border-radius:9px;background:none;border:none;cursor:pointer;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:.15s}
 .ib:hover{background:var(--s2);color:var(--t2)}
 .sfb, .sndbtn, .ib, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent }
 
-/* ── MESSAGE BUBBLES ── */
+/* ── Пузырьки сообщений ── */
 .mrow{display:flex;padding:6px 0;margin-bottom:10px;width:100%}
 .mrow.out{justify-content:flex-end;padding-right:20px}
 .mrow.in{justify-content:flex-start;padding-left:20px}
@@ -137,16 +137,16 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .bub img{border-radius:12px}
 .mmeta{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:11px;color:var(--t3);justify-content:flex-end}
 
-/* Adaptive bubble width: shrink for short messages, allow expansion for long */
+/* Адаптивная ширина всплывающего окна: сужается для коротких сообщений, расширяется для длинных. */
 .bub{min-width:56px;max-width:72ch}
 /* timestamp inside bubble */
 .bub .mtime{display:block;font-size:11px;color:var(--t3);opacity:.9;margin-top:6px}
 
-/* Chat messages container padding so bubbles don't stick to edges */
+/*  Вкладыш в контейнере для сообщений чата предотвращает прилипание пузырьков к краям.  */
 #msgs{flex:1;overflow-y:auto;padding:18px 24px}
 
 
-/* ── RIGHT PANEL ── */
+/* ── правая панель ── */
 .rphdr{height:58px;display:flex;align-items:center;padding:0 14px;gap:11px;border-bottom:1px solid var(--bd);flex-shrink:0;position:relative}
 .rphdr-close-area{position:absolute;left:0;top:0;right:0;bottom:0;background:transparent;border:none;cursor:pointer}
 .rphdr{cursor:pointer}
@@ -165,7 +165,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .rpr.red{color:var(--red)}
 .rpr.red:hover{background:rgba(255,82,82,.08)}
 
-/* ── CTX MENU ── */
+/* ── CTX менб ── */
 #ctx{position:fixed;background:var(--s2);border:1px solid var(--bd2);border-radius:13px;padding:5px 0;min-width:185px;box-shadow:0 12px 40px rgba(0,0,0,.6);z-index:1000;display:none;animation:mpop .14s ease}
 #ctx.op{display:block}
 .cxi{padding:9px 15px;cursor:pointer;font-size:13.5px;color:var(--t2);display:flex;align-items:center;gap:9px;transition:background .1s}
@@ -175,7 +175,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .cxi.dim{opacity:.35;pointer-events:none}
 .cxsep{height:1px;background:var(--bd);margin:4px 0}
 
-/* ── PANEL SCREENS ── */
+/* ── панельные экраны  ── */
 .pscr{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;flex-direction:column;animation:sldUp .22s ease}
 .pscr.off{display:none}
 .pshdr{height:58px;display:flex;align-items:center;padding:0 18px;gap:13px;border-bottom:1px solid var(--bd);flex-shrink:0}
@@ -223,16 +223,16 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .abtn:hover{background:var(--acc);transform:translateY(-1px)}
 .aerr{font-size:12px;color:var(--red);margin-bottom:11px;text-align:center}
 
-/* ── EMPTY ── */
+/* ── пустой ── */
 #empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;color:var(--s4)}
 .elogo{font-size:52px;font-weight:800;letter-spacing:-4px}
 .esub{font-size:13.5px;color:var(--t4)}
 
-/* ── NOTIF ── */
+/* ── соо ── */
 #notif{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--s2);border:1px solid var(--bd2);color:var(--t1);padding:9px 20px;border-radius:18px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:2000;opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;white-space:nowrap}
 #notif.sh{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ── DIALOG ── */
+/* ── диалог ── */
 .dov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:800;display:flex;align-items:center;justify-content:center;animation:fIn .18s}
 .dov.off{display:none}
 .dbox{background:var(--s1);border:1px solid var(--bd2);border-radius:16px;padding:22px;width:330px;box-shadow:0 16px 48px rgba(0,0,0,.6);animation:crdIn .22s cubic-bezier(.34,1.56,.64,1)}
@@ -240,7 +240,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 .dcancel{width:100%;margin-top:9px;padding:10px;border-radius:9px;border:1px solid var(--bd2);background:none;color:var(--t3);font-family:inherit;font-size:13.5px;cursor:pointer;transition:.15s}
 .dcancel:hover{background:var(--s2);color:var(--t2)}
 
-/* ── ANIMATIONS ── */
+/* ── анимации ── */
 @keyframes bIn{from{opacity:0;transform:scale(.93) translateY(6px)}to{opacity:1;transform:none}}
 @keyframes sldL{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
 @keyframes sldR{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
@@ -250,14 +250,14 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 @keyframes mpop{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:none}}
 @keyframes tdot{0%,80%,100%{transform:scale(.65);opacity:.45}40%{transform:scale(1);opacity:1}}
 
-/* Message enter animation */
+/* Анимация ввода сообщения */
 @keyframes bubPop {
   from { opacity: 0; transform: translateY(10px) scale(.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .bub.enter { animation: bubPop .24s cubic-bezier(.2,.9,.3,1) both; }
 
-/* ── MOBILE ── */
+/* ── МОБИЛЬНЫЙ ── */
 @media (max-width: 768px) {
   /* On mobile show main by default (list + empty view). When a chat is opened we add .msgview to hide sidebar */
   #sidebar{width:100%;min-width:100%;border-right:none}
@@ -576,7 +576,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
   <div class="cxi red" onclick="cxDo('del')">✕ Удалить</div>
 </div>
 
-<!-- FORWARD DIALOG -->
+<!-- ПЕРЕДОВОЙ ДИАЛОГ -->
 <div id="fwddlg" class="dov off">
   <div class="dbox">
     <div class="dtit">Переслать сообщение</div>
@@ -596,7 +596,7 @@ html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans'
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
 
 <script>
-// Firebase configuration - HATE MESSENGER PROJECT
+// Конфигурация Firebase - Проект HATE MESSENGER
 const firebaseConfig = {
   apiKey: "AIzaSyCVcSmwPF6XPup8L9AO-mmP3qQpXGO697w",
   authDomain: "weed-messenger-8200e.firebaseapp.com",
@@ -607,10 +607,10 @@ const firebaseConfig = {
   measurementId: "G-BY7LCJ28RL"
 };
 
-// Initialize Firebase
+// Инициализировать Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Initialize Firebase modules as GLOBAL variables
+// Инициализируйте модули Firebase как глобальные переменные.
 window.auth = firebase.auth();
 window.db = firebase.firestore();
 window.storage = firebase.storage();
